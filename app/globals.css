@@ -1,31 +1,47 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: dark --default;
+}
+
+/* Кастомизация темы dark (DaisyUI v5 syntax) */
+@plugin "daisyui/theme" {
+  name: "dark";
+  default: true;
+
+  /* Основные цвета */
+  --color-primary: #6366f1;
+  --color-primary-content: #ffffff;
+  
+  --color-secondary: #7c3aed;
+  --color-secondary-content: #ffffff;
+  
+  --color-accent: #0891b2;
+  --color-accent-content: #ffffff;
+  
+  --color-neutral: #2a3256;
+  --color-neutral-content: #a6adbb;
+  
+  /* Фоновые цвета */
+  --color-base-100: #0a0e27;
+  --color-base-200: #141937;
+  --color-base-300: #1e2549;
+  --color-base-content: #a6adbb;
+
+  /* Статусные цвета */
+  --color-info: #3b82f6;
+  --color-info-content: #ffffff;
+  
+  --color-success: #10b981;
+  --color-success-content: #ffffff;
+  
+  --color-warning: #f59e0b;
+  --color-warning-content: #ffffff;
+  
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+}
 
 /* Основные стили */
 body {
   @apply bg-base-100 text-base-content;
-}
-
-/* Настройка темы */
-/* DaisyUI 5 использует CSS переменные. Переопределяем их для дефолтной темной темы */
-:root,
-[data-theme="dark"] {
-  /* Primary: #6366f1 */
-  --primary: #6366f1;
-  --primary-content: #ffffff;
-
-  /* Base colors */
-  --base-100: #0a0e27;
-  --base-200: #141937;
-  --base-300: #1e2549;
-
-  /* Neutral */
-  --neutral: #2a3256;
-  --neutral-content: #a6adbb;
-  
-  /* Восстанавливаем дефолтные цвета DaisyUI, которые вы убрали из конфига, 
-     но здесь они просто останутся дефолтными от DaisyUI, если их не трогать.
-     Если нужно явно задать secondary/accent как в дефолте - их можно не писать, 
-     они возьмутся из темы.
-  */
 }
