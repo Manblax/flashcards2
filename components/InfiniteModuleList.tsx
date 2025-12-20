@@ -124,7 +124,7 @@ const InfiniteModuleList = ({ allModules }: InfiniteModuleListProps) => {
           <h2 className="text-sm font-bold text-neutral-content mb-4 tracking-wider">
             {group.title}
           </h2>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {group.modules.map((module) => (
               <ModuleCard key={module.id} module={module} />
             ))}
