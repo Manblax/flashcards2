@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL") // Пока отключим для локальной разработки
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  author      String
+  termCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  terms       Term[]
+}
+
+model Term {
+  id          String   @id @default(uuid())
+  term        String
+  definition  String
+  image       String?
+  isFavorite  Boolean  @default(false)
+  
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Module } from "@/types/module";
 import ModuleCard from "./ModuleCard";
+import { getModules } from "@/lib/api";
 
 interface InfiniteModuleListProps {
-  allModules: Module[];
+  initialModules: Module[];
 }
 
 interface GroupedModules {
@@ -15,28 +16,21 @@ interface GroupedModules {
 
 const MODULES_PER_PAGE = 20;
 
-const InfiniteModuleList = ({ allModules }: InfiniteModuleListProps) => {
-  const [displayedModules, setDisplayedModules] = useState<Module[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+const InfiniteModuleList = ({ initialModules }: InfiniteModuleListProps) => {
+  const [displayedModules, setDisplayedModules] = useState<Module[]>(initialModules);
+  const [page, setPage] = useState(1); // Страница 1 уже загружена (initialModules)
+  const [hasMore, setHasMore] = useState(initialModules.length >= MODULES_PER_PAGE);
   const [isLoading, setIsLoading] = useState(false);
   const observerRef = useRef<HTMLDivElement>(null);
 
-  // Загружаем первую страницу при монтировании
-  useEffect(() => {
-    loadMoreModules();
-  }, []);
-
-  const loadMoreModules = useCallback(() => {
+  const loadMoreModules = useCallback(async () => {
     if (isLoading || !hasMore) return;
 
     setIsLoading(true);
 
-    // Имитируем задержку загрузки
-    setTimeout(() => {
-      const startIndex = (page - 1) * MODULES_PER_PAGE;
-      const endIndex = startIndex + MODULES_PER_PAGE;
-      const newModules = allModules.slice(startIndex, endIndex);
+    try {
+      const skip = page * MODULES_PER_PAGE;
+      const newModules = await getModules(skip, MODULES_PER_PAGE);
 
       if (newModules.length === 0) {
         setHasMore(false);
@@ -44,14 +38,16 @@ const InfiniteModuleList = ({ allModules }: InfiniteModuleListProps) => {
         setDisplayedModules((prev) => [...prev, ...newModules]);
         setPage((prev) => prev + 1);
         
-        if (endIndex >= allModules.length) {
+        if (newModules.length < MODULES_PER_PAGE) {
           setHasMore(false);
         }
       }
-
+    } catch (error) {
+      console.error("Error loading more modules:", error);
+    } finally {
       setIsLoading(false);
-    }, 500);
-  }, [page, allModules, isLoading, hasMore]);
+    }
+  }, [page, isLoading, hasMore]);
 
   // Настраиваем Intersection Observer для бесконечной прокрутки
   useEffect(() => {
@@ -88,9 +84,10 @@ const InfiniteModuleList = ({ allModules }: InfiniteModuleListProps) => {
     const older: Module[] = [];
 
     modules.forEach((module) => {
-      if (module.createdAt >= oneWeekAgo) {
+      const createdAt = new Date(module.createdAt); // Убедимся, что это Date объект
+      if (createdAt >= oneWeekAgo) {
         thisWeek.push(module);
-      } else if (module.createdAt >= twoWeeksAgo) {
+      } else if (createdAt >= twoWeeksAgo) {
         lastWeek.push(module);
       } else {
         older.push(module);
@@ -105,7 +102,7 @@ const InfiniteModuleList = ({ allModules }: InfiniteModuleListProps) => {
     }
     if (older.length > 0) {
       // Определяем месяц для более старых модулей
-      const month = older[0].createdAt.toLocaleDateString("ru-RU", {
+      const month = new Date(older[0].createdAt).toLocaleDateString("ru-RU", {
         month: "long",
         year: "numeric",
       }).toUpperCase();
@@ -155,4 +152,3 @@ const InfiniteModuleList = ({ allModules }: InfiniteModuleListProps) => {
 };
 
 export default InfiniteModuleList;
-
