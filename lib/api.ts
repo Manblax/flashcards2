@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:3001";
 
 export async function getModules(skip = 0, take = 20) {
   const res = await fetch(`${API_URL}/flashcards?skip=${skip}&take=${take}`, { 

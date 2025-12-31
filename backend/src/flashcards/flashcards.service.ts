@@ -29,14 +29,11 @@ export class FlashcardsService {
     });
   }
 
-  findAll() {
+  findAll(skip?: number, take?: number) {
     return this.prisma.module.findMany({
+      skip,
+      take,
       orderBy: { createdAt: 'desc' },
-      include: {
-        _count: {
-          select: { terms: true },
-        },
-      },
     });
   }
 

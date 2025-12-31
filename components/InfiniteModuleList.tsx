@@ -16,7 +16,7 @@ interface GroupedModules {
 
 const MODULES_PER_PAGE = 20;
 
-const InfiniteModuleList = ({ initialModules }: InfiniteModuleListProps) => {
+const InfiniteModuleList = ({ initialModules = [] }: InfiniteModuleListProps) => {
   const [displayedModules, setDisplayedModules] = useState<Module[]>(initialModules);
   const [page, setPage] = useState(1); // Страница 1 уже загружена (initialModules)
   const [hasMore, setHasMore] = useState(initialModules.length >= MODULES_PER_PAGE);
