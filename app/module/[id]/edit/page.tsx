@@ -1,5 +1,5 @@
-import { mockModules } from "@/lib/mockData";
 import ModuleForm from "@/components/ModuleForm";
+import { getModule } from "@/lib/api";
 
 interface EditPageProps {
   params: Promise<{
@@ -9,7 +9,7 @@ interface EditPageProps {
 
 export default async function EditPage({ params }: EditPageProps) {
   const { id } = await params;
-  const module = mockModules.find((m) => m.id === id);
+  const module = await getModule(id);
 
   if (!module) {
     return (

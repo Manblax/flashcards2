@@ -24,15 +24,15 @@ export async function getModule(id: string) {
   return res.json();
 }
 
-export async function createModule(data: any) {
-  const res = await fetch(`${API_URL}/flashcards`, {
-    method: "POST",
+export async function updateModule(id: string, data: any) {
+  const res = await fetch(`${API_URL}/flashcards/${id}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
   
   if (!res.ok) {
-    throw new Error("Failed to create module");
+    throw new Error("Failed to update module");
   }
   
   return res.json();

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Module } from "@/types/module";
-import { createModule } from "@/lib/api";
+import { createModule, updateModule } from "@/lib/api";
 
 interface TermCard {
   id: string;
@@ -92,11 +92,10 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
         await createModule(moduleData);
         router.push("/");
         router.refresh(); // Обновляем список модулей на главной
-      } else {
-        // TODO: Implement update logic
-        console.log("Update not implemented yet", moduleData);
-        // await updateModule(initialData.id, moduleData);
-        router.push(`/module/${initialData?.id}`);
+      } else if (initialData?.id) {
+        await updateModule(initialData.id, moduleData);
+        router.push(`/module/${initialData.id}`);
+        router.refresh();
       }
     } catch (error) {
       console.error("Failed to save module:", error);

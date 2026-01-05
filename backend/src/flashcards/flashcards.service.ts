@@ -46,16 +46,38 @@ export class FlashcardsService {
     });
   }
 
-  update(id: string, updateFlashcardDto: UpdateFlashcardDto) {
-    // Это упрощенная логика обновления. 
-    // В реальности нужно умнее обновлять термины (создавать новые, удалять старые, обновлять существующие).
-    // Пока просто обновим поля модуля.
-    return this.prisma.module.update({
-      where: { id },
-      data: {
-        title: updateFlashcardDto.title,
-        description: updateFlashcardDto.description,
-      },
+  async update(id: string, updateFlashcardDto: UpdateFlashcardDto) {
+    const { terms, ...moduleData } = updateFlashcardDto;
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Обновляем данные модуля
+      const updatedModule = await tx.module.update({
+        where: { id },
+        data: {
+          ...moduleData,
+          termCount: terms ? terms.length : undefined,
+        },
+      });
+
+      // 2. Если переданы термины, перезаписываем их (удаляем старые, создаем новые)
+      if (terms) {
+        await tx.term.deleteMany({
+          where: { moduleId: id },
+        });
+
+        if (terms.length > 0) {
+          await tx.term.createMany({
+            data: terms.map((term) => ({
+              term: term.term,
+              definition: term.definition,
+              image: term.image,
+              moduleId: id,
+            })),
+          });
+        }
+      }
+
+      return updatedModule;
     });
   }
 
