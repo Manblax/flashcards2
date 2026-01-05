@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Module } from "@/types/module";
+import { createModule } from "@/lib/api";
 
 interface TermCard {
   id: string;
@@ -20,23 +21,24 @@ interface ModuleFormProps {
 export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || "");
-  const [description, setDescription] = useState(initialData?.description || ""); // В типе Module нет description, но предположим оно есть или добавим
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [isSaving, setIsSaving] = useState(false);
   
-  // Если редактируем, преобразуем термины модуля в формат карточек
-  // В mockData терминов пока нет в типе Module (там только count), 
-  // поэтому для демо будем использовать заглушки или если расширим тип.
-  // Пока сделаю инициализацию с пустыми или демо-данными.
-  const [cards, setCards] = useState<TermCard[]>(
-    initialData 
-      ? [ // Демо данные для редактирования, т.к. в Module нет списка терминов
-          { id: "1", term: "wind up", definition: "заводить" },
-          { id: "2", term: "unwind", definition: "расслабиться, развеяться" }
-        ]
-      : [
-          { id: "1", term: "", definition: "" },
-          { id: "2", term: "", definition: "" },
-        ]
-  );
+  // Инициализация карточек
+  const [cards, setCards] = useState<TermCard[]>(() => {
+    if (initialData?.terms && initialData.terms.length > 0) {
+      return initialData.terms.map(t => ({
+        id: t.id,
+        term: t.term,
+        definition: t.definition,
+        image: t.image
+      }));
+    }
+    return [
+      { id: "1", term: "", definition: "" },
+      { id: "2", term: "", definition: "" },
+    ];
+  });
 
   const addCard = () => {
     setCards([
@@ -59,13 +61,48 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     );
   };
 
-  const handleSave = () => {
-    // Логика сохранения
-    console.log("Saving module:", { title, description, cards });
-    if (mode === "create") {
-       router.push("/");
-    } else {
-       router.push(`/module/${initialData?.id}`);
+  const handleSave = async () => {
+    if (!title.trim()) {
+      alert("Пожалуйста, введите название модуля");
+      return;
+    }
+
+    // Фильтруем пустые карточки
+    const validTerms = cards.filter(c => c.term.trim() || c.definition.trim()).map(c => ({
+      term: c.term,
+      definition: c.definition,
+      image: c.image
+    }));
+
+    if (validTerms.length < 2) {
+      alert("Добавьте как минимум 2 термина");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const moduleData = {
+        title,
+        description,
+        terms: validTerms
+      };
+
+      if (mode === "create") {
+        await createModule(moduleData);
+        router.push("/");
+        router.refresh(); // Обновляем список модулей на главной
+      } else {
+        // TODO: Implement update logic
+        console.log("Update not implemented yet", moduleData);
+        // await updateModule(initialData.id, moduleData);
+        router.push(`/module/${initialData?.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to save module:", error);
+      alert("Ошибка при сохранении модуля");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -84,8 +121,13 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
         <button 
           className="btn btn-primary btn-sm px-8 rounded-full font-bold"
           onClick={handleSave}
+          disabled={isSaving}
         >
-          {mode === "create" ? "Создать" : "Готово"}
+          {isSaving ? (
+            <span className="loading loading-spinner loading-sm"></span>
+          ) : (
+            mode === "create" ? "Создать" : "Готово"
+          )}
         </button>
       </div>
 
