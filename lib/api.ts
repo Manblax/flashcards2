@@ -24,6 +24,20 @@ export async function getModule(id: string) {
   return res.json();
 }
 
+export async function createModule(data: any) {
+  const res = await fetch(`${API_URL}/flashcards`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  
+  if (!res.ok) {
+    throw new Error("Failed to create module");
+  }
+  
+  return res.json();
+}
+
 export async function updateModule(id: string, data: any) {
   const res = await fetch(`${API_URL}/flashcards/${id}`, {
     method: "PATCH",
@@ -37,4 +51,3 @@ export async function updateModule(id: string, data: any) {
   
   return res.json();
 }
-
