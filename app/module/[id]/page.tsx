@@ -1,4 +1,4 @@
-import { mockModules } from "@/lib/mockData";
+import { getModule } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -10,7 +10,7 @@ interface ModulePageProps {
 
 export default async function ModulePage({ params }: ModulePageProps) {
   const { id } = await params;
-  const module = mockModules.find((m) => m.id === id);
+  const module = await getModule(id);
 
   if (!module) {
     notFound();
