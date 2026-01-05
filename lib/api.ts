@@ -51,3 +51,15 @@ export async function updateModule(id: string, data: any) {
   
   return res.json();
 }
+
+export async function deleteModule(id: string) {
+  const res = await fetch(`${API_URL}/flashcards/${id}`, {
+    method: "DELETE",
+  });
+  
+  if (!res.ok) {
+    throw new Error("Failed to delete module");
+  }
+  
+  return res.json();
+}
