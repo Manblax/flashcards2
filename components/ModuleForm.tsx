@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Module } from "@/types/module";
-import { createModule, updateModule } from "@/lib/api";
+import { createModule, updateModule, uploadFile } from "@/lib/api";
 
 interface TermCard {
   id: string;
@@ -23,6 +23,8 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingCardId, setUploadingCardId] = useState<string | null>(null);
   
   // Инициализация карточек
   const [cards, setCards] = useState<TermCard[]>(() => {
@@ -53,12 +55,34 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     }
   };
 
-  const updateCard = (id: string, field: "term" | "definition", value: string) => {
+  const updateCard = (id: string, field: "term" | "definition" | "image", value: string) => {
     setCards(
       cards.map((card) =>
         card.id === id ? { ...card, [field]: value } : card
       )
     );
+  };
+
+  const handleImageClick = (cardId: string) => {
+    setUploadingCardId(cardId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && uploadingCardId) {
+      try {
+        const { url } = await uploadFile(file);
+        // FIXME: Hardcoded URL. Should be dynamic or relative if proxy is setup.
+        const fullUrl = `http://localhost:3001${url}`;
+        updateCard(uploadingCardId, "image", fullUrl);
+      } catch (error) {
+        console.error("Upload failed", error);
+        alert("Ошибка загрузки изображения");
+      }
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setUploadingCardId(null);
   };
 
   const handleSave = async () => {
@@ -214,11 +238,27 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
 
                 {/* Загрузка изображения */}
                 <div className="flex-none pt-1">
-                   <button className="w-24 h-20 border-2 border-dashed border-neutral/30 hover:border-neutral/60 rounded-lg flex flex-col items-center justify-center gap-1 text-neutral-content hover:text-white transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-[10px] uppercase font-bold tracking-wide">Изображение</span>
+                   <button 
+                     className="w-24 h-20 border-2 border-dashed border-neutral/30 hover:border-neutral/60 rounded-lg flex flex-col items-center justify-center gap-1 text-neutral-content hover:text-white transition-colors overflow-hidden relative"
+                     onClick={() => handleImageClick(card.id)}
+                   >
+                      {card.image ? (
+                        <>
+                            <img src={card.image} alt="term" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                               </svg>
+                            </div>
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-[10px] uppercase font-bold tracking-wide">Изображение</span>
+                        </>
+                      )}
                    </button>
                 </div>
               </div>
@@ -236,6 +276,14 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
           <span className="font-bold text-lg">+ Добавить карточку</span>
         </button>
       </div>
+
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        accept="image/*"
+        onChange={handleFileChange}
+      />
     </div>
   );
 }

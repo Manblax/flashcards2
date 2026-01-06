@@ -63,3 +63,19 @@ export async function deleteModule(id: string) {
   
   return res.json();
 }
+
+export async function uploadFile(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${API_URL}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to upload file");
+  }
+
+  return res.json();
+}
