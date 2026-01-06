@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import UserMenu from "./UserMenu";
 
 const Header = () => {
   return (
@@ -68,11 +69,7 @@ const Header = () => {
             </svg>
           </Link>
 
-          <div className="avatar placeholder">
-            <div className="bg-neutral text-neutral-content rounded-full w-10">
-              <span className="text-sm">ME</span>
-            </div>
-          </div>
+          <UserMenu />
         </div>
       </div>
     </header>
