@@ -79,3 +79,33 @@ export async function uploadFile(file: File) {
 
   return res.json();
 }
+
+export async function register(data: any) {
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "Registration failed");
+  }
+  
+  return res.json();
+}
+
+export async function login(data: any) {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "Login failed");
+  }
+  
+  return res.json();
+}

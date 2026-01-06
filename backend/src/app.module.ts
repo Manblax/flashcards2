@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { FlashcardsModule } from './flashcards/flashcards.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -12,6 +13,7 @@ import { join } from 'path';
     FlashcardsModule, 
     PrismaModule,
     UploadsModule,
+    AuthModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
