@@ -1,203 +1,136 @@
-# FlashCards2 🎯
+# FlashCards2
 
-Современное веб-приложение для изучения материалов с помощью флэш-карточек.
+Полнофункциональное приложение для изучения материалов через флэш-карточки.
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
-![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![React](https://img.shields.io/badge/React-19-149eca)
+![NestJS](https://img.shields.io/badge/NestJS-11-e0234e)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
 
-## 📸 Скриншоты
+## Текущее состояние
 
-Приложение реализовано согласно предоставленному дизайну с темной темой и современным UI.
+### Реализовано
 
-## ✨ Возможности
+- Главная страница с последними модулями
+- Библиотека с бесконечной прокруткой
+- Группировка модулей по времени (эта неделя, прошлая неделя, старше)
+- Просмотр модуля и списка терминов
+- Создание, редактирование и удаление модулей
+- Загрузка изображений для терминов
+- Регистрация и вход пользователя (JWT возвращается backend'ом)
+- PostgreSQL + Prisma для хранения пользователей, модулей и терминов
 
-- ✅ **Главная страница** с 6 недавними модулями
-- ✅ **Библиотека модулей** с бесконечной прокруткой
-- ✅ **Группировка по времени** (эта неделя, прошлая неделя, по месяцам)
-- ✅ **Адаптивный дизайн** для всех устройств
-- ✅ **Темная тема** по умолчанию
-- ✅ **Sidebar навигация** с подсветкой активного раздела
-- ✅ **Динамический роутинг** для модулей
-- 🚧 Создание и редактирование модулей (в разработке)
-- 🚧 Система изучения карточек (в разработке)
+### В работе
 
-## 🚀 Быстрый старт
+- Учебные режимы (карточки/заучивание/тест) на странице модуля
+- Полноценная серверная авторизация для защищенных операций
 
-### Установка
+## Технологический стек
+
+### Frontend (корень репозитория)
+
+- Next.js 16.0.10 (App Router)
+- React 19.2.1
+- TypeScript 5
+- Tailwind CSS 4
+- DaisyUI 5.5.13
+
+### Backend (`backend/`)
+
+- NestJS 11
+- Prisma 6.19.1
+- PostgreSQL 15 (через Docker)
+- JWT + Passport для аутентификации
+- Multer для загрузки файлов
+
+## Быстрый старт
+
+### 1. Установка зависимостей
 
 ```bash
-# Клонируйте репозиторий (если используете git)
-git clone <repository-url>
-cd flashcards2
-
-# Установите зависимости
 npm install
+cd backend && npm install
 ```
 
-### Запуск в режиме разработки
+### 2. Поднять PostgreSQL
 
 ```bash
+docker compose up -d
+```
+
+Сервис базы данных поднимается на `localhost:5432`, pgAdmin на `localhost:5050`.
+
+### 3. Запустить backend
+
+```bash
+cd backend
+npx prisma migrate deploy
+npm run start:dev
+```
+
+Backend запускается на `http://localhost:3001`.
+
+### 4. Запустить frontend
+
+```bash
+cd ..
 npm run dev
 ```
 
-Откройте [http://localhost:3000](http://localhost:3000) в браузере.
+Frontend запускается на `http://localhost:3000`.
 
-### Сборка для продакшена
+## Скрипты
+
+### Frontend (корень)
 
 ```bash
+npm run dev
 npm run build
-npm start
+npm run start
+npm run lint
 ```
 
-## 🛠️ Технологический стек
-
-### Frontend
-- **[Next.js 14](https://nextjs.org/)** - React фреймворк с App Router
-- **[React 18](https://react.dev/)** - библиотека для создания UI
-- **[TypeScript 5](https://www.typescriptlang.org/)** - строгая типизация
-- **[Tailwind CSS 3](https://tailwindcss.com/)** - утилитарный CSS
-- **[DaisyUI 4](https://daisyui.com/)** - компонентная библиотека
-
-### Инструменты разработки
-- ESLint - линтер кода
-- PostCSS - обработка CSS
-- Autoprefixer - автопрефиксы для CSS
-
-## 📁 Структура проекта
-
-```
-flashcards2/
-├── app/                          # Next.js App Router
-│   ├── layout.tsx               # Корневой layout
-│   ├── page.tsx                 # Главная страница
-│   ├── globals.css              # Глобальные стили
-│   ├── library/
-│   │   └── page.tsx             # Страница библиотеки
-│   ├── create/
-│   │   └── page.tsx             # Страница создания модуля
-│   └── module/[id]/
-│       └── page.tsx             # Динамическая страница модуля
-│
-├── components/                   # React компоненты
-│   ├── layout/
-│   │   ├── MainLayout.tsx       # Основной layout
-│   │   ├── Header.tsx           # Шапка приложения
-│   │   └── Sidebar.tsx          # Боковая панель
-│   ├── ModuleCard.tsx           # Карточка модуля
-│   └── InfiniteModuleList.tsx   # Список с infinite scroll
-│
-├── types/
-│   └── module.ts                # TypeScript интерфейсы
-│
-├── lib/
-│   └── mockData.ts              # Моковые данные
-│
-├── public/                       # Статические файлы
-│
-├── tailwind.config.ts           # Конфигурация Tailwind
-├── tsconfig.json                # Конфигурация TypeScript
-├── next.config.mjs              # Конфигурация Next.js
-└── package.json                 # Зависимости проекта
-```
-
-## 🎨 Дизайн системы
-
-### Цветовая палитра
-```
-Primary:         #6366f1  (индиго)
-Base-100:        #0a0e27  (темно-синий фон)
-Base-200:        #141937  (sidebar)
-Base-300:        #1e2549  (карточки)
-Neutral:         #2a3256  (границы)
-Neutral-content: #a6adbb  (вторичный текст)
-```
-
-### Компоненты
-- Карточки с `rounded-2xl` и мягкими тенями
-- Hover эффекты с плавными переходами
-- Адаптивная сетка (1-2 колонки)
-- Sticky header для удобной навигации
-
-## 🔧 Технические особенности
-
-### Бесконечная прокрутка
-- Использует **Intersection Observer API**
-- Загрузка по **20 модулей** за раз
-- Оптимизированная производительность
-- Индикатор загрузки и состояние завершения
-
-### Группировка модулей
-Автоматическая группировка по временным периодам:
-- **НА ЭТОЙ НЕДЕЛЕ** (последние 7 дней)
-- **НА ПРОШЛОЙ НЕДЕЛЕ** (8-14 дней назад)
-- **По месяцам** (старше 14 дней)
-
-### Динамический роутинг
-```typescript
-/module/[id] - динамическая страница для каждого модуля
-```
-
-### Правильное склонение
-```typescript
-1 термин
-2-4 термина
-5+ терминов
-```
-
-## 📚 Документация
-
-- **[QUICK_START.md](./QUICK_START.md)** - быстрый старт за 3 шага
-- **[COMPONENTS.md](./COMPONENTS.md)** - подробная документация компонентов
-- **[PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md)** - полный обзор проекта
-
-## 🎯 Roadmap
-
-### v0.2.0 (ближайшее будущее)
-- [ ] Полноценная форма создания модулей
-- [ ] CRUD операции для модулей и терминов
-- [ ] Функциональный поиск
-- [ ] Страница изучения карточек
-
-### v0.3.0
-- [ ] Система аутентификации (NextAuth.js)
-- [ ] База данных (PostgreSQL + Prisma)
-- [ ] API роуты
-- [ ] Фильтры и сортировка
-
-### v1.0.0
-- [ ] Статистика обучения
-- [ ] Система повторений (Spaced Repetition)
-- [ ] Экспорт/импорт модулей
-- [ ] Совместное использование
-
-## 📝 Скрипты
+### Backend (`backend/`)
 
 ```bash
-npm run dev      # Запуск dev сервера
-npm run build    # Сборка проекта
-npm start        # Запуск prod сервера
-npm run lint     # Проверка кода линтером
+npm run start:dev
+npm run build
+npm run start:prod
+npm run test
+npm run test:e2e
 ```
 
-## 🤝 Вклад в проект
+## Структура проекта
 
-Следуем принципам:
-- **SOLID** - принципы ООП
-- **KISS** - простота кода
-- **DRY** - отсутствие дублирования
-- **Clean Code** - читаемость и поддерживаемость
+```text
+flashcards2/
+├── app/                         # Next.js routes (home, library, auth, module pages)
+├── components/                  # UI components and layouts
+├── lib/                         # API client for backend calls
+├── types/                       # Shared TS types for frontend
+├── backend/
+│   ├── src/
+│   │   ├── auth/                # register/login + JWT strategy
+│   │   ├── flashcards/          # CRUD for modules/terms
+│   │   ├── uploads/             # image upload endpoint
+│   │   └── prisma/              # Prisma service/module
+│   ├── prisma/                  # schema + migrations
+│   └── uploads/                 # uploaded files
+├── docker-compose.yml           # PostgreSQL + pgAdmin
+└── README.md
+```
 
-## 📄 Лицензия
+## API (основные маршруты)
 
-Этот проект лицензирован под MIT License.
+- `GET /flashcards`, `GET /flashcards/:id`
+- `POST /flashcards`, `PATCH /flashcards/:id`, `DELETE /flashcards/:id`
+- `POST /upload`
+- `POST /auth/register`
+- `POST /auth/login`
 
-## 👨‍💻 Автор
+## Документация
 
-**manblax**
-
----
-
-**Сделано с ❤️ используя Next.js и TypeScript**
-
+- [QUICK_START.md](./QUICK_START.md)
+- [COMPONENTS.md](./COMPONENTS.md)
+- [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md)
