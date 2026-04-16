@@ -50,10 +50,10 @@ export default function UserMenu() {
   const initials = user.username ? user.username.slice(0, 2).toUpperCase() : "ME";
 
   return (
-    <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar placeholder">
-        <div className="bg-neutral text-neutral-content rounded-full w-10">
-          <span className="text-sm font-bold">{initials}</span>
+    <div className="dropdown dropdown-end shrink-0">
+      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle p-0">
+        <div className="w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
+          <span className="text-sm font-bold leading-none">{initials}</span>
         </div>
       </div>
       <div
@@ -62,10 +62,8 @@ export default function UserMenu() {
       >
         {/* Информация о пользователе */}
         <div className="flex items-center gap-3 mb-4 px-2">
-          <div className="avatar placeholder">
-            <div className="bg-neutral text-neutral-content rounded-full w-12">
-              <span className="text-lg font-bold">{initials}</span>
-            </div>
+          <div className="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center shrink-0">
+            <span className="text-lg font-bold leading-none">{initials}</span>
           </div>
           <div className="overflow-hidden">
             <div className="font-bold text-white truncate" title={user.username}>{user.username}</div>
