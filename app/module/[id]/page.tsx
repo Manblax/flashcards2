@@ -1,4 +1,5 @@
 import { getModule } from "@/lib/api";
+import { getServerAuthToken } from "@/lib/server-auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteModuleButton from "@/components/DeleteModuleButton";
@@ -11,7 +12,8 @@ interface ModulePageProps {
 
 export default async function ModulePage({ params }: ModulePageProps) {
   const { id } = await params;
-  const module = await getModule(id);
+  const token = await getServerAuthToken();
+  const module = await getModule(id, { token });
 
   if (!module) {
     notFound();

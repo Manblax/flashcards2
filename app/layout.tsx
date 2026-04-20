@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import MainLayout from "@/components/layout/MainLayout";
+import AuthSessionSync from "@/components/AuthSessionSync";
 
 export const metadata: Metadata = {
   title: "FlashCards2",
@@ -15,9 +16,9 @@ export default function RootLayout({
   return (
     <html lang="ru" data-theme="dark">
       <body>
+        <AuthSessionSync />
         <MainLayout>{children}</MainLayout>
       </body>
     </html>
   );
 }
-

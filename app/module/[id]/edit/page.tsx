@@ -1,5 +1,6 @@
 import ModuleForm from "@/components/ModuleForm";
 import { getModule } from "@/lib/api";
+import { getServerAuthToken } from "@/lib/server-auth";
 
 interface EditPageProps {
   params: Promise<{
@@ -9,7 +10,8 @@ interface EditPageProps {
 
 export default async function EditPage({ params }: EditPageProps) {
   const { id } = await params;
-  const module = await getModule(id);
+  const token = await getServerAuthToken();
+  const module = await getModule(id, { token });
 
   if (!module) {
     return (
@@ -25,4 +27,3 @@ export default async function EditPage({ params }: EditPageProps) {
     </div>
   );
 }
-

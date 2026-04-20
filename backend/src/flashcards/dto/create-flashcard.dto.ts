@@ -7,6 +7,5 @@ export class CreateTermDto {
 export class CreateFlashcardDto {
   title: string;
   description?: string;
-  author?: string;
   terms?: CreateTermDto[];
 }

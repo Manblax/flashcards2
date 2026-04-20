@@ -3,32 +3,51 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-}
+import {
+  AUTH_STATE_CHANGE_EVENT,
+  clearAuthSession,
+  getStoredUser,
+  type AuthUser,
+} from "@/lib/auth";
 
 export default function UserMenu() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Получаем пользователя из localStorage
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Failed to parse user", e);
+    const syncUser = () => {
+      setUser(getStoredUser());
+    };
+
+    const handleAuthStateChange = (event: Event) => {
+      const { detail } = event as CustomEvent<AuthUser | null>;
+
+      if (detail) {
+        setUser(detail);
+      } else {
+        syncUser();
       }
-    }
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key === "user") {
+        syncUser();
+      }
+    };
+
+    syncUser();
+
+    window.addEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthStateChange);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthStateChange);
+      window.removeEventListener("storage", handleStorage);
+    };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    clearAuthSession();
     setUser(null);
     router.push("/login");
     router.refresh();

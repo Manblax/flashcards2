@@ -1,12 +1,38 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FlashcardsService } from './flashcards.service';
+import { PrismaService } from '../prisma/prisma.service';
+import type { JwtUser } from '../auth/interfaces/jwt-user.interface';
 
 describe('FlashcardsService', () => {
   let service: FlashcardsService;
+  let prisma: {
+    module: {
+      findMany: jest.Mock;
+      create: jest.Mock;
+    };
+  };
+
+  const user: JwtUser = {
+    userId: 'user-1',
+    username: 'alice',
+  };
 
   beforeEach(async () => {
+    prisma = {
+      module: {
+        findMany: jest.fn(),
+        create: jest.fn(),
+      },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FlashcardsService],
+      providers: [
+        FlashcardsService,
+        {
+          provide: PrismaService,
+          useValue: prisma,
+        },
+      ],
     }).compile();
 
     service = module.get<FlashcardsService>(FlashcardsService);
@@ -14,5 +40,55 @@ describe('FlashcardsService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('scopes module lists to the authenticated user', async () => {
+    prisma.module.findMany.mockResolvedValue([]);
+
+    await service.findAll(user, 0, 20);
+
+    expect(prisma.module.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { userId: 'user-1' },
+          { userId: null, author: 'alice' },
+        ],
+      },
+      skip: 0,
+      take: 20,
+      orderBy: { createdAt: 'desc' },
+    });
+  });
+
+  it('stores the authenticated user as the module owner on create', async () => {
+    prisma.module.create.mockResolvedValue({});
+
+    await service.create(user, {
+      title: 'Spanish',
+      description: 'Basics',
+      terms: [
+        { term: 'hola', definition: 'hello' },
+        { term: 'adios', definition: 'bye' },
+      ],
+    });
+
+    expect(prisma.module.create).toHaveBeenCalledWith({
+      data: {
+        title: 'Spanish',
+        description: 'Basics',
+        author: 'alice',
+        termCount: 2,
+        userId: 'user-1',
+        terms: {
+          create: [
+            { term: 'hola', definition: 'hello', image: undefined },
+            { term: 'adios', definition: 'bye', image: undefined },
+          ],
+        },
+      },
+      include: {
+        terms: true,
+      },
+    });
   });
 });

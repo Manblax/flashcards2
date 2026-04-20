@@ -1,20 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { CreateFlashcardDto } from './dto/create-flashcard.dto';
 import { UpdateFlashcardDto } from './dto/update-flashcard.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import type { JwtUser } from '../auth/interfaces/jwt-user.interface';
 
 @Injectable()
 export class FlashcardsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createFlashcardDto: CreateFlashcardDto) {
-    // Создаем модуль вместе с терминами
+  private moduleAccessWhere(user: JwtUser, id?: string): Prisma.ModuleWhereInput {
+    return {
+      ...(id ? { id } : {}),
+      OR: [
+        { userId: user.userId },
+        { userId: null, author: user.username },
+      ],
+    };
+  }
+
+  create(user: JwtUser, createFlashcardDto: CreateFlashcardDto) {
     return this.prisma.module.create({
       data: {
         title: createFlashcardDto.title,
         description: createFlashcardDto.description,
-        author: createFlashcardDto.author || 'Anonymous',
+        author: user.username,
         termCount: createFlashcardDto.terms?.length || 0,
+        userId: user.userId,
         terms: {
           create: createFlashcardDto.terms?.map((term) => ({
             term: term.term,
@@ -29,40 +41,55 @@ export class FlashcardsService {
     });
   }
 
-  findAll(skip?: number, take?: number) {
+  findAll(user: JwtUser, skip?: number, take?: number) {
     return this.prisma.module.findMany({
+      where: this.moduleAccessWhere(user),
       skip,
       take,
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  findOne(id: string) {
-    return this.prisma.module.findUnique({
-      where: { id },
+  async findOne(user: JwtUser, id: string) {
+    const module = await this.prisma.module.findFirst({
+      where: this.moduleAccessWhere(user, id),
       include: {
         terms: true,
       },
     });
+
+    if (!module) {
+      throw new NotFoundException('Module not found');
+    }
+
+    return module;
   }
 
-  async update(id: string, updateFlashcardDto: UpdateFlashcardDto) {
-    const { terms, ...moduleData } = updateFlashcardDto;
+  async update(user: JwtUser, id: string, updateFlashcardDto: UpdateFlashcardDto) {
+    const { terms, title, description } = updateFlashcardDto;
 
     return this.prisma.$transaction(async (tx) => {
-      // 1. Обновляем данные модуля
+      const existingModule = await tx.module.findFirst({
+        where: this.moduleAccessWhere(user, id),
+        select: { id: true },
+      });
+
+      if (!existingModule) {
+        throw new NotFoundException('Module not found');
+      }
+
       const updatedModule = await tx.module.update({
-        where: { id },
+        where: { id: existingModule.id },
         data: {
-          ...moduleData,
+          title,
+          description,
           termCount: terms ? terms.length : undefined,
         },
       });
 
-      // 2. Если переданы термины, перезаписываем их (удаляем старые, создаем новые)
       if (terms) {
         await tx.term.deleteMany({
-          where: { moduleId: id },
+          where: { moduleId: existingModule.id },
         });
 
         if (terms.length > 0) {
@@ -71,7 +98,7 @@ export class FlashcardsService {
               term: term.term,
               definition: term.definition,
               image: term.image,
-              moduleId: id,
+              moduleId: existingModule.id,
             })),
           });
         }
@@ -81,9 +108,18 @@ export class FlashcardsService {
     });
   }
 
-  remove(id: string) {
+  async remove(user: JwtUser, id: string) {
+    const existingModule = await this.prisma.module.findFirst({
+      where: this.moduleAccessWhere(user, id),
+      select: { id: true },
+    });
+
+    if (!existingModule) {
+      throw new NotFoundException('Module not found');
+    }
+
     return this.prisma.module.delete({
-      where: { id },
+      where: { id: existingModule.id },
     });
   }
 }

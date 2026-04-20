@@ -1,14 +1,18 @@
 import InfiniteModuleList from "@/components/InfiniteModuleList";
 import { getModules } from "@/lib/api";
+import { getServerAuthToken } from "@/lib/server-auth";
 import { Module } from "@/types/module";
 
 export default async function LibraryPage() {
   let initialModules: Module[] = [];
+  const token = await getServerAuthToken();
   
-  try {
-    initialModules = await getModules(0, 20);
-  } catch (error) {
-    console.error("Failed to fetch modules:", error);
+  if (token) {
+    try {
+      initialModules = await getModules(0, 20, { token });
+    } catch (error) {
+      console.error("Failed to fetch modules:", error);
+    }
   }
 
   return (
@@ -23,7 +27,13 @@ export default async function LibraryPage() {
       </div>
 
       {/* Контент */}
-      <InfiniteModuleList initialModules={initialModules} />
+      {token ? (
+        <InfiniteModuleList initialModules={initialModules} />
+      ) : (
+        <div className="text-neutral-content">
+          Войдите, чтобы открыть свою библиотеку.
+        </div>
+      )}
     </div>
   );
 }

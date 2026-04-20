@@ -19,6 +19,7 @@
 - Создание, редактирование и удаление модулей
 - Загрузка изображений для терминов
 - Регистрация и вход пользователя (JWT возвращается backend'ом)
+- Вход и регистрация через Google OAuth
 - PostgreSQL + Prisma для хранения пользователей, модулей и терминов
 
 ### В работе
@@ -70,6 +71,13 @@ npm run start:dev
 ```
 
 Backend запускается на `http://localhost:3001`.
+
+Для Google OAuth нужно заполнить переменные в `backend/.env`:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_CALLBACK_URL` (по умолчанию `http://localhost:3001/auth/google/callback`)
+- `FRONTEND_URL` (по умолчанию `http://localhost:3000`)
 
 ### 4. Запустить frontend
 
@@ -128,6 +136,8 @@ flashcards2/
 - `POST /upload`
 - `POST /auth/register`
 - `POST /auth/login`
+- `GET /auth/google`
+- `GET /auth/google/callback`
 
 ## Документация
 
