@@ -129,6 +129,15 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     }
   };
 
+  const moduleInputClassName =
+    "input w-full rounded-2xl border border-transparent bg-[#111233] px-5 text-lg font-medium text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[#15183d] focus:bg-[#1d2149] focus:border-[#a9b0ff] focus:shadow-[0_0_0_1px_rgba(169,176,255,0.45)] focus:outline-none";
+
+  const moduleTextareaClassName =
+    "textarea w-full min-h-[100px] rounded-2xl border border-transparent bg-[#111233] px-5 py-4 text-base text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[#15183d] focus:bg-[#1d2149] focus:border-[#a9b0ff] focus:shadow-[0_0_0_1px_rgba(169,176,255,0.45)] focus:outline-none";
+
+  const termInputClassName =
+    "input w-full rounded-xl border border-transparent bg-[#0f1130] px-4 text-lg font-semibold text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[#14173a] focus:bg-[#1a1f45] focus:border-[#a9b0ff] focus:shadow-[0_0_0_1px_rgba(169,176,255,0.45)] focus:outline-none";
+
   return (
     <div className="max-w-5xl mx-auto">
       {/* Хедер формы с действиями */}
@@ -163,7 +172,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
           <input
             type="text"
             placeholder="Название" // Для create
-            className="input input-bordered w-full bg-base-300/50 border-neutral/20 focus:border-primary/50 text-lg font-medium placeholder:text-neutral-content/50"
+            className={moduleInputClassName}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -171,7 +180,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
         <div className="form-control">
           <textarea
             placeholder="Добавьте описание..."
-            className="textarea textarea-bordered w-full bg-base-300/50 border-neutral/20 focus:border-primary/50 text-base min-h-[100px] placeholder:text-neutral-content/50"
+            className={moduleTextareaClassName}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
@@ -214,7 +223,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 <div className="flex-1 form-control w-full">
                   <input
                     type="text"
-                    className="input input-ghost w-full border-b-2 border-transparent border-b-neutral/30 focus:border-b-warning focus:bg-base-200/50 rounded-none px-0 text-white placeholder:text-neutral-content/50 transition-all text-lg"
+                    className={termInputClassName}
                     value={card.term}
                     onChange={(e) => updateCard(card.id, "term", e.target.value)}
                   />
@@ -227,7 +236,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 <div className="flex-1 form-control w-full">
                   <input
                     type="text"
-                    className="input input-ghost w-full border-b-2 border-transparent border-b-neutral/30 focus:border-b-warning focus:bg-base-200/50 rounded-none px-0 text-white placeholder:text-neutral-content/50 transition-all text-lg"
+                    className={termInputClassName}
                     value={card.definition}
                     onChange={(e) => updateCard(card.id, "definition", e.target.value)}
                   />
@@ -287,4 +296,3 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     </div>
   );
 }
-
