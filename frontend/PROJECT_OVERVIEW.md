@@ -2,7 +2,7 @@
 
 ## 📋 Описание
 
-FlashCards2 - современное веб-приложение для изучения материалов с помощью флэш-карточек. Разработано с использованием Next.js 14, TypeScript и DaisyUI.
+FlashCards2 - современное веб-приложение для изучения материалов с помощью флэш-карточек. Frontend расположен в `frontend/` и построен на Next.js, TypeScript и DaisyUI.
 
 ## ✨ Реализованные функции
 
@@ -65,21 +65,20 @@ Text:       #a6adbb (вторичный текст)
 ### Технологический стек
 ```
 Frontend:
-├── Next.js 14 (App Router)
-├── React 18
+├── Next.js 16 (App Router)
+├── React 19
 ├── TypeScript 5
-├── Tailwind CSS 3
-└── DaisyUI 4
+├── Tailwind CSS 4
+└── DaisyUI 5
 
 Инструменты:
 ├── PostCSS
-├── Autoprefixer
 └── ESLint
 ```
 
 ### Структура каталогов
-```
-flashcards2/
+```text
+frontend/
 ├── app/                        # Next.js App Router
 │   ├── layout.tsx             # Корневой layout с MainLayout
 │   ├── page.tsx               # Главная страница
@@ -105,7 +104,7 @@ flashcards2/
 ├── lib/                        # Утилиты и данные
 │   └── mockData.ts            # Генератор моковых данных
 │
-└── public/                     # Статические файлы
+└── package.json                # Зависимости и скрипты
 ```
 
 ## 🔧 Технические детали
@@ -172,7 +171,7 @@ interface Module {
 ## 🚀 Производительность
 
 ### Оптимизации
-- ✅ Server Components по умолчанию (Next.js 14)
+- ✅ Server Components по умолчанию (Next.js 16)
 - ✅ Client Components только где необходимо
 - ✅ Ленивая загрузка модулей (Infinite Scroll)
 - ✅ Оптимизированные изображения через next/image (если будут)
@@ -228,10 +227,10 @@ xl:  1280px
 ## 📚 Документация
 
 ### Доступные документы
-1. **README.md** - общая информация о проекте
-2. **QUICK_START.md** - быстрый старт за 3 шага
+1. **../README.md** - общая информация о проекте
+2. **QUICK_START.md** - быстрый старт frontend
 3. **COMPONENTS.md** - подробная документация компонентов
-4. **PROJECT_OVERVIEW.md** (этот файл) - общий обзор
+4. **PROJECT_OVERVIEW.md** (этот файл) - общий обзор frontend
 
 ### Комментарии в коде
 Код хорошо прокомментирован для лучшего понимания:
@@ -281,4 +280,3 @@ MIT License - свободное использование и модифика�
 **Дата создания:** Декабрь 2025  
 **Версия:** 0.1.0  
 **Статус:** MVP готов ✅
-

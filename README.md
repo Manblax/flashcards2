@@ -29,7 +29,7 @@
 
 ## Технологический стек
 
-### Frontend (корень репозитория)
+### Frontend (`frontend/`)
 
 - Next.js 16.0.10 (App Router)
 - React 19.2.1
@@ -50,8 +50,8 @@
 ### 1. Установка зависимостей
 
 ```bash
-npm install
-cd backend && npm install
+(cd frontend && npm install)
+(cd backend && npm install)
 ```
 
 ### 2. Поднять PostgreSQL
@@ -65,6 +65,7 @@ docker compose up -d
 ### 3. Запустить backend
 
 ```bash
+# terminal 1
 cd backend
 npx prisma migrate deploy
 npm run start:dev
@@ -82,7 +83,8 @@ Backend запускается на `http://localhost:3001`.
 ### 4. Запустить frontend
 
 ```bash
-cd ..
+# terminal 2
+cd frontend
 npm run dev
 ```
 
@@ -90,9 +92,10 @@ Frontend запускается на `http://localhost:3000`.
 
 ## Скрипты
 
-### Frontend (корень)
+### Frontend (`frontend/`)
 
 ```bash
+cd frontend
 npm run dev
 npm run build
 npm run start
@@ -102,6 +105,7 @@ npm run lint
 ### Backend (`backend/`)
 
 ```bash
+cd backend
 npm run start:dev
 npm run build
 npm run start:prod
@@ -113,10 +117,6 @@ npm run test:e2e
 
 ```text
 flashcards2/
-├── app/                         # Next.js routes (home, library, auth, module pages)
-├── components/                  # UI components and layouts
-├── lib/                         # API client for backend calls
-├── types/                       # Shared TS types for frontend
 ├── backend/
 │   ├── src/
 │   │   ├── auth/                # register/login + JWT strategy
@@ -125,6 +125,12 @@ flashcards2/
 │   │   └── prisma/              # Prisma service/module
 │   ├── prisma/                  # schema + migrations
 │   └── uploads/                 # uploaded files
+├── frontend/
+│   ├── app/                     # Next.js routes (home, library, auth, module pages)
+│   ├── components/              # UI components and layouts
+│   ├── lib/                     # API client for backend calls
+│   ├── types/                   # Shared TS types for frontend
+│   └── package.json             # Frontend package manifest
 ├── docker-compose.yml           # PostgreSQL + pgAdmin
 └── README.md
 ```
@@ -141,6 +147,6 @@ flashcards2/
 
 ## Документация
 
-- [QUICK_START.md](./QUICK_START.md)
-- [COMPONENTS.md](./COMPONENTS.md)
-- [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md)
+- [frontend/QUICK_START.md](./frontend/QUICK_START.md)
+- [frontend/COMPONENTS.md](./frontend/COMPONENTS.md)
+- [frontend/PROJECT_OVERVIEW.md](./frontend/PROJECT_OVERVIEW.md)

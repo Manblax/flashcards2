@@ -1,10 +1,13 @@
 # Быстрый старт FlashCards2
 
+Все команды ниже выполняются из директории `frontend/`.
+
 ## Установка и запуск за 3 шага
 
 ### 1. Установите зависимости
 
 ```bash
+cd frontend
 npm install
 ```
 
@@ -60,16 +63,17 @@ yarn dev
 
 ## Технологии
 
-- **Next.js 14** с App Router
+- **Next.js 16** с App Router
+- **React 19** для интерфейса
 - **TypeScript** для типобезопасности
-- **DaisyUI** для готовых компонентов
-- **Tailwind CSS** для стилизации
+- **DaisyUI 5** для готовых компонентов
+- **Tailwind CSS 4** для стилизации
 - **Intersection Observer API** для бесконечной прокрутки
 
 ## Структура файлов
 
-```
-flashcards2/
+```text
+frontend/
 ├── app/                    # Next.js App Router
 │   ├── layout.tsx         # Корневой layout
 │   ├── page.tsx           # Главная страница
@@ -82,7 +86,7 @@ flashcards2/
 │   └── InfiniteModuleList.tsx
 ├── types/                # TypeScript типы
 ├── lib/                  # Утилиты и моковые данные
-└── public/               # Статические файлы
+└── package.json          # Зависимости и скрипты
 ```
 
 ## Дополнительные команды
@@ -133,4 +137,3 @@ npm run lint
 ---
 
 **Приятной работы с FlashCards2! 🚀**
-
