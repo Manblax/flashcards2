@@ -1,6 +1,21 @@
 import type { Module } from "@/types/module";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const INTERNAL_API_URL = process.env.INTERNAL_API_URL || PUBLIC_API_URL;
+
+export const API_URL = PUBLIC_API_URL;
+
+function getApiBaseUrl() {
+  return typeof window === "undefined" ? INTERNAL_API_URL : PUBLIC_API_URL;
+}
+
+function buildApiUrl(path: string, baseUrl = getApiBaseUrl()) {
+  return new URL(path, `${baseUrl.replace(/\/$/, "")}/`).toString();
+}
+
+export function getPublicApiUrl(path = "") {
+  return path ? buildApiUrl(path, PUBLIC_API_URL) : PUBLIC_API_URL;
+}
 
 interface RequestOptions {
   token?: string | null;
@@ -30,14 +45,14 @@ function withAuthHeaders(headers?: HeadersInit, token?: string | null) {
 }
 
 async function apiFetch(path: string, init: RequestInit = {}, token?: string | null) {
-  return fetch(`${API_URL}${path}`, {
+  return fetch(buildApiUrl(path), {
     ...init,
     headers: withAuthHeaders(init.headers, token),
   });
 }
 
 export function getGoogleAuthUrl() {
-  return `${API_URL}/auth/google`;
+  return getPublicApiUrl("/auth/google");
 }
 
 export async function getModules(
@@ -151,7 +166,7 @@ export async function uploadFile(file: File, options: RequestOptions = {}) {
 }
 
 export async function register(data: any) {
-  const res = await fetch(`${API_URL}/auth/register`, {
+  const res = await fetch(getPublicApiUrl("/auth/register"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -166,7 +181,7 @@ export async function register(data: any) {
 }
 
 export async function login(data: any) {
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const res = await fetch(getPublicApiUrl("/auth/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Module } from "@/types/module";
-import { createModule, updateModule, uploadFile } from "@/lib/api";
+import { createModule, getPublicApiUrl, updateModule, uploadFile } from "@/lib/api";
 
 interface TermCard {
   id: string;
@@ -73,8 +73,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     if (file && uploadingCardId) {
       try {
         const { url } = await uploadFile(file);
-        // FIXME: Hardcoded URL. Should be dynamic or relative if proxy is setup.
-        const fullUrl = `http://localhost:3001${url}`;
+        const fullUrl = getPublicApiUrl(url);
         updateCard(uploadingCardId, "image", fullUrl);
       } catch (error) {
         console.error("Upload failed", error);
