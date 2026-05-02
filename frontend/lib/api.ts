@@ -5,6 +5,36 @@ const INTERNAL_API_URL = process.env.INTERNAL_API_URL || PUBLIC_API_URL;
 
 export const API_URL = PUBLIC_API_URL;
 
+export interface DictionaryDefinition {
+  text: string;
+  partOfSpeech?: string;
+  guideWord?: string;
+  cefr?: string;
+  examples: string[];
+  source: "cambridge" | "oxford";
+}
+
+export interface DictionaryLookupResult {
+  word: string;
+  normalizedWord: string;
+  suggestedDefinition: string | null;
+  definitions: DictionaryDefinition[];
+  ipa: {
+    uk?: string;
+    us?: string;
+  };
+  audio: {
+    uk?: string;
+    us?: string;
+  };
+  sources: {
+    definitions?: "cambridge" | "oxford";
+    ipa?: "cambridge" | "oxford";
+    audio?: "cambridge" | "oxford";
+  };
+  cached: boolean;
+}
+
 function getApiBaseUrl() {
   return typeof window === "undefined" ? INTERNAL_API_URL : PUBLIC_API_URL;
 }
@@ -146,6 +176,25 @@ export async function deleteModule(id: string, options: RequestOptions = {}) {
     throw new Error("Failed to delete module");
   }
   
+  return res.json();
+}
+
+export async function lookupDictionary(
+  word: string,
+  options: RequestOptions = {},
+): Promise<DictionaryLookupResult> {
+  const res = await apiFetch(
+    `/dictionary/lookup?word=${encodeURIComponent(word)}`,
+    {
+      cache: "no-store",
+    },
+    options.token,
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to lookup dictionary word");
+  }
+
   return res.json();
 }
 

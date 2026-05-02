@@ -51,3 +51,22 @@ model Term {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model DictionaryEntry {
+  id             String   @id @default(uuid())
+  normalizedWord String   @unique
+  payload        Json
+  sourceMap      Json?
+  expiresAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model DictionaryAudio {
+  id        String   @id
+  variant   String
+  source    String
+  sourceUrl String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

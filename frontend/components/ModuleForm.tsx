@@ -4,7 +4,14 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Module } from "@/types/module";
-import { createModule, getPublicApiUrl, updateModule, uploadFile } from "@/lib/api";
+import {
+  createModule,
+  getPublicApiUrl,
+  lookupDictionary,
+  updateModule,
+  uploadFile,
+  type DictionaryDefinition,
+} from "@/lib/api";
 
 interface TermCard {
   id: string;
@@ -25,6 +32,9 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingCardId, setUploadingCardId] = useState<string | null>(null);
+  const [lookupCardId, setLookupCardId] = useState<string | null>(null);
+  const [lookupOptions, setLookupOptions] = useState<Record<string, DictionaryDefinition[]>>({});
+  const [lookupErrors, setLookupErrors] = useState<Record<string, string>>({});
   
   // Инициализация карточек
   const [cards, setCards] = useState<TermCard[]>(() => {
@@ -56,11 +66,80 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   };
 
   const updateCard = (id: string, field: "term" | "definition" | "image", value: string) => {
-    setCards(
-      cards.map((card) =>
+    setCards((currentCards) =>
+      currentCards.map((card) =>
         card.id === id ? { ...card, [field]: value } : card
       )
     );
+  };
+
+  const applyDefinition = (cardId: string, definition: string) => {
+    updateCard(cardId, "definition", definition);
+    setLookupOptions((options) => {
+      const nextOptions = { ...options };
+      delete nextOptions[cardId];
+      return nextOptions;
+    });
+    setLookupErrors((errors) => {
+      const nextErrors = { ...errors };
+      delete nextErrors[cardId];
+      return nextErrors;
+    });
+  };
+
+  const handleDictionaryLookup = async (card: TermCard) => {
+    const term = card.term.trim();
+
+    if (!term) {
+      setLookupErrors((errors) => ({
+        ...errors,
+        [card.id]: "Введите термин",
+      }));
+      return;
+    }
+
+    setLookupCardId(card.id);
+    setLookupErrors((errors) => {
+      const nextErrors = { ...errors };
+      delete nextErrors[card.id];
+      return nextErrors;
+    });
+
+    try {
+      const result = await lookupDictionary(term);
+      const definitions = result.definitions.filter((definition) => definition.text);
+
+      if (definitions.length === 0 || !result.suggestedDefinition) {
+        setLookupOptions((options) => {
+          const nextOptions = { ...options };
+          delete nextOptions[card.id];
+          return nextOptions;
+        });
+        setLookupErrors((errors) => ({
+          ...errors,
+          [card.id]: "Определение не найдено",
+        }));
+        return;
+      }
+
+      if (!card.definition.trim() && definitions.length === 1) {
+        applyDefinition(card.id, result.suggestedDefinition);
+        return;
+      }
+
+      setLookupOptions((options) => ({
+        ...options,
+        [card.id]: definitions.slice(0, 5),
+      }));
+    } catch (error) {
+      console.error("Dictionary lookup failed", error);
+      setLookupErrors((errors) => ({
+        ...errors,
+        [card.id]: "Не удалось получить определение",
+      }));
+    } finally {
+      setLookupCardId(null);
+    }
   };
 
   const handleImageClick = (cardId: string) => {
@@ -220,12 +299,30 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
               <div className="flex flex-col lg:flex-row gap-6">
                 {/* Термин */}
                 <div className="flex-1 form-control w-full">
-                  <input
-                    type="text"
-                    className={termInputClassName}
-                    value={card.term}
-                    onChange={(e) => updateCard(card.id, "term", e.target.value)}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className={termInputClassName}
+                      value={card.term}
+                      onChange={(e) => updateCard(card.id, "term", e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="btn h-12 min-h-12 w-12 rounded-xl border-transparent bg-[#1d2149] p-0 text-[#dce0ff] hover:bg-[#293064]"
+                      onClick={() => handleDictionaryLookup(card)}
+                      disabled={lookupCardId === card.id}
+                      title="Найти определение"
+                      aria-label="Найти определение"
+                    >
+                      {lookupCardId === card.id ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   <label className="label px-0 pt-2">
                     <span className="label-text-alt text-neutral-content uppercase tracking-wider text-xs font-bold">Термин</span>
                   </label>
@@ -242,6 +339,9 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                   <label className="label px-0 pt-2">
                      <span className="label-text-alt text-neutral-content uppercase tracking-wider text-xs font-bold">Определение</span>
                   </label>
+                  {lookupErrors[card.id] ? (
+                    <div className="text-xs font-semibold text-error">{lookupErrors[card.id]}</div>
+                  ) : null}
                 </div>
 
                 {/* Загрузка изображения */}
@@ -270,6 +370,27 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                    </button>
                 </div>
               </div>
+
+              {lookupOptions[card.id]?.length ? (
+                <div className="mt-4 rounded-lg border border-neutral/20 bg-[#0f1130] p-3">
+                  <div className="mb-2 text-xs font-bold uppercase text-neutral-content">Выберите определение</div>
+                  <div className="space-y-2">
+                    {lookupOptions[card.id].map((definition, definitionIndex) => (
+                      <button
+                        type="button"
+                        key={`${definition.text}-${definitionIndex}`}
+                        className="block w-full rounded-md px-3 py-2 text-left text-sm text-white hover:bg-[#1d2149]"
+                        onClick={() => applyDefinition(card.id, definition.text)}
+                      >
+                        <span className="font-semibold text-[#a9b0ff]">
+                          {definition.partOfSpeech || definition.source}
+                        </span>
+                        <span className="ml-2">{definition.text}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         ))}

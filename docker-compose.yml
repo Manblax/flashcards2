@@ -29,6 +29,8 @@ services:
       DATABASE_URL: postgresql://myuser:mypassword@postgres:5432/flashcards_db
       FRONTEND_URL: http://localhost:3000
       GOOGLE_CALLBACK_URL: http://localhost:3001/auth/google/callback
+      DICTIONARY_SERVICE_URL: http://dictionary-service:4000
+      DICTIONARY_CACHE_TTL_DAYS: 30
     command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run start:dev"
     ports:
       - '3001:3001'
@@ -38,6 +40,23 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      dictionary-service:
+        condition: service_started
+
+  dictionary-service:
+    image: node:22-bookworm-slim
+    container_name: flashcards_dictionary_service
+    restart: always
+    working_dir: /app
+    environment:
+      PORT: 4000
+      DICTIONARY_TIMEOUT_MS: 6000
+    command: sh -c "npm install && npm run start:dev"
+    expose:
+      - '4000'
+    volumes:
+      - ./dictionary-service:/app
+      - dictionary_service_node_modules:/app/node_modules
 
   frontend:
     image: node:22-bookworm-slim
@@ -71,4 +90,5 @@ services:
 volumes:
   postgres_data:
   backend_node_modules:
+  dictionary_service_node_modules:
   frontend_node_modules:
