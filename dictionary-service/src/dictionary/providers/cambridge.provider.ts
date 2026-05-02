@@ -18,7 +18,9 @@ const CAMBRIDGE_BASE_URL = 'https://dictionary.cambridge.org';
 
 @Injectable()
 export class CambridgeProvider {
-  private readonly timeoutMs = Number(process.env.DICTIONARY_TIMEOUT_MS || 6000);
+  private readonly timeoutMs = Number(
+    process.env.DICTIONARY_TIMEOUT_MS || 6000,
+  );
 
   async lookup(word: string): Promise<ProviderLookupResult> {
     const normalizedWord = normalizeWord(word);
@@ -35,8 +37,8 @@ export class CambridgeProvider {
     const normalizedWord = normalizeWord(word);
     const definitions: ProviderDefinition[] = [];
     const ipa = {
-      uk: cleanText($('.uk .ipa').first().text()) || undefined,
-      us: cleanText($('.us .ipa').first().text()) || undefined,
+      uk: this.extractIpa($, '.uk'),
+      us: this.extractIpa($, '.us'),
     };
     const audio = {
       uk: this.extractAudio($, '.uk'),
@@ -49,11 +51,6 @@ export class CambridgeProvider {
         cleanText(entryNode.find('.posgram .pos').first().text()) ||
         cleanText(entryNode.find('.pos-header .pos').first().text()) ||
         undefined;
-      const cefr =
-        cleanText(entryNode.find('.epp-xref .dxref').first().text()) ||
-        cleanText(entryNode.find('.def-info .epp-xref').first().text()) ||
-        undefined;
-
       entryNode.find('.def-block').each((__, block) => {
         const definition = this.extractDefinition($, block);
 
@@ -65,7 +62,7 @@ export class CambridgeProvider {
           text: definition,
           partOfSpeech,
           guideWord: this.extractGuideWord($, block),
-          cefr,
+          cefr: this.extractCefr($, block),
           examples: this.extractExamples($, block),
           source: 'cambridge',
         });
@@ -100,29 +97,84 @@ export class CambridgeProvider {
   }
 
   private extractDefinition($: CheerioAPI, block: any) {
-    return (
+    const definition =
       cleanText($(block).find('.def.ddef_d.db').first().text()) ||
       cleanText($(block).find('.def').first().text()) ||
+      undefined;
+
+    return definition?.replace(/:$/, '');
+  }
+
+  private extractIpa($: CheerioAPI, rootSelector: string) {
+    return (
+      cleanText($(`${rootSelector} .pron`).first().text()) ||
+      cleanText($(`${rootSelector} .ipa`).first().text()) ||
+      undefined
+    );
+  }
+
+  private extractCefr($: CheerioAPI, block: any) {
+    return (
+      cleanText($(block).find('.def-info .epp-xref.dxref').first().text()) ||
+      cleanText($(block).find('.def-info .epp-xref').first().text()) ||
+      cleanText($(block).find('.epp-xref.dxref').first().text()) ||
+      cleanText($(block).find('.epp-xref').first().text()) ||
       undefined
     );
   }
 
   private extractGuideWord($: CheerioAPI, block: any) {
-    return (
+    return this.normalizeGuideWord(
       cleanText($(block).prevAll('.guideword').first().find('.gw').text()) ||
-      cleanText($(block).closest('.pr.dsense').find('.guideword .gw').first().text()) ||
-      cleanText($(block).closest('.sense-body').prev('.guideword').find('.gw').text()) ||
-      undefined
+        cleanText($(block).prevAll('.guideword').first().text()) ||
+        cleanText(
+          $(block).closest('.pr.dsense').find('.guideword .gw').first().text(),
+        ) ||
+        cleanText(
+          $(block).closest('.pr.dsense').find('.guideword').first().text(),
+        ) ||
+        cleanText(
+          $(block).closest('.sense-body').prev('.guideword').find('.gw').text(),
+        ) ||
+        cleanText($(block).closest('.sense-body').prev('.guideword').text()) ||
+        undefined,
     );
   }
 
+  private normalizeGuideWord(value: string | undefined) {
+    const guideWord = cleanText(value).replace(/^\((.*)\)$/, '$1');
+
+    return guideWord || undefined;
+  }
+
   private extractExamples($: CheerioAPI, block: any) {
-    return uniqueStrings(
-      $(block)
-        .find('.examp .eg, .examp, .eg')
-        .map((_, example) => cleanText($(example).text()))
-        .get(),
-    ).slice(0, 5);
+    const examples: string[] = [];
+
+    $(block)
+      .find('.examp, .eg')
+      .each((_, example) => {
+        const exampleNode = $(example);
+
+        if (exampleNode.hasClass('examp')) {
+          const nestedExamples = exampleNode.find('.eg');
+
+          if (nestedExamples.length) {
+            nestedExamples.each((__, nestedExample) => {
+              examples.push(cleanText($(nestedExample).text()));
+            });
+          } else {
+            examples.push(cleanText(exampleNode.text()));
+          }
+
+          return;
+        }
+
+        if (!exampleNode.closest('.examp').length) {
+          examples.push(cleanText(exampleNode.text()));
+        }
+      });
+
+    return uniqueStrings(examples).slice(0, 5);
   }
 
   private extractAudio($: CheerioAPI, rootSelector: string) {

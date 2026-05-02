@@ -18,7 +18,9 @@ const OXFORD_BASE_URL = 'https://www.oxfordlearnersdictionaries.com';
 
 @Injectable()
 export class OxfordProvider {
-  private readonly timeoutMs = Number(process.env.DICTIONARY_TIMEOUT_MS || 6000);
+  private readonly timeoutMs = Number(
+    process.env.DICTIONARY_TIMEOUT_MS || 6000,
+  );
 
   async lookup(word: string): Promise<ProviderLookupResult> {
     const normalizedWord = normalizeWord(word);
@@ -66,6 +68,8 @@ export class OxfordProvider {
         definitions.push({
           text,
           partOfSpeech,
+          guideWord: this.extractGuideWord($, sense),
+          cefr: this.extractCefr($, sense),
           examples: this.extractExamples($, sense),
           source: 'oxford',
         });
@@ -104,6 +108,19 @@ export class OxfordProvider {
       cleanText($(sense).find('.xrefs .xr').first().text()) ||
       undefined
     );
+  }
+
+  private extractGuideWord($: CheerioAPI, sense: any) {
+    return (
+      cleanText($(sense).closest('.shcut-g').find('.shcut').first().text()) ||
+      undefined
+    );
+  }
+
+  private extractCefr($: CheerioAPI, sense: any) {
+    const cefr = cleanText($(sense).attr('cefr'));
+
+    return cefr ? cefr.toUpperCase() : undefined;
   }
 
   private extractExamples($: CheerioAPI, sense: any) {
