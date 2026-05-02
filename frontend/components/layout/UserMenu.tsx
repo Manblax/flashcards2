@@ -69,50 +69,51 @@ export default function UserMenu() {
   const initials = user.username ? user.username.slice(0, 2).toUpperCase() : "ME";
 
   return (
-    <div className="dropdown dropdown-end shrink-0">
+    <div className="dropdown dropdown-end relative z-[100] shrink-0">
       <div tabIndex={0} role="button" className="btn btn-ghost btn-circle p-0">
         <div className="w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
-          <span className="text-sm font-bold leading-none">{initials}</span>
+          <span className="text-sm font-semibold leading-none">{initials}</span>
         </div>
       </div>
       <div
         tabIndex={0}
-        className="dropdown-content z-[1] menu p-4 shadow-lg bg-base-200 rounded-box w-72 mt-2 border border-neutral/20"
+        className="dropdown-content right-0 top-full z-[100] mt-3 w-80 rounded-xl border border-[#262d55] bg-[#151a36] p-6 shadow-2xl shadow-black/35"
       >
         {/* Информация о пользователе */}
-        <div className="flex items-center gap-3 mb-4 px-2">
+        <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-neutral text-neutral-content flex items-center justify-center shrink-0">
-            <span className="text-lg font-bold leading-none">{initials}</span>
+            <span className="text-lg font-semibold leading-none">{initials}</span>
           </div>
           <div className="overflow-hidden">
-            <div className="font-bold text-white truncate" title={user.username}>{user.username}</div>
-            <div className="text-xs text-neutral-content truncate" title={user.email}>{user.email}</div>
+            <div className="text-lg font-semibold text-white truncate" title={user.username}>{user.username}</div>
+            <div className="text-sm text-neutral-content truncate" title={user.email}>{user.email}</div>
           </div>
         </div>
 
-        <div className="divider my-0"></div>
+        <div className="my-6 h-px bg-[#252c52]"></div>
 
         {/* Меню */}
-        <ul className="menu menu-sm gap-1 px-0">
-          <li>
-            <a className="text-neutral-content hover:text-white hover:bg-base-300 py-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="space-y-2">
+          <Link
+            href="/settings"
+            className="flex items-center gap-5 rounded-lg px-3 py-3 text-lg font-medium text-neutral-content transition-colors hover:bg-[#1d2447] hover:text-white"
+          >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
               Настройки
-            </a>
-          </li>
-        </ul>
+          </Link>
+        </div>
 
-        <div className="divider my-0"></div>
+        <div className="my-6 h-px bg-[#252c52]"></div>
 
-        <div className="mt-2">
+        <div>
           <button 
             onClick={handleLogout}
-            className="btn btn-ghost btn-sm w-full justify-start text-neutral-content hover:text-white hover:bg-base-300"
+            className="flex w-full items-center gap-5 rounded-lg px-3 py-3 text-left text-lg font-medium text-neutral-content transition-colors hover:bg-[#1d2447] hover:text-white"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Выйти
