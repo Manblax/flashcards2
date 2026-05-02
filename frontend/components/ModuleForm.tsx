@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Module } from "@/types/module";
@@ -25,6 +25,9 @@ interface ModuleFormProps {
   mode: "create" | "edit";
 }
 
+type ImportTermDefinitionSeparator = "tab" | "comma" | "custom";
+type ImportCardSeparator = "newline" | "semicolon" | "custom";
+
 export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState(initialData?.title || "");
@@ -37,6 +40,15 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   const [lookupOptions, setLookupOptions] = useState<Record<string, DictionaryDefinition[]>>({});
   const [lookupErrors, setLookupErrors] = useState<Record<string, string>>({});
   const [lookupTerms, setLookupTerms] = useState<Record<string, string>>({});
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [termDefinitionSeparator, setTermDefinitionSeparator] =
+    useState<ImportTermDefinitionSeparator>("tab");
+  const [cardSeparator, setCardSeparator] =
+    useState<ImportCardSeparator>("newline");
+  const [customTermDefinitionSeparator, setCustomTermDefinitionSeparator] =
+    useState("");
+  const [customCardSeparator, setCustomCardSeparator] = useState("");
   
   // Инициализация карточек
   const [cards, setCards] = useState<TermCard[]>(() => {
@@ -60,6 +72,24 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       { id: Date.now().toString(), term: "", definition: "" },
     ]);
   };
+
+  const parsedImportCards = useMemo(
+    () =>
+      parseImportedCards({
+        text: importText,
+        termDefinitionSeparator,
+        cardSeparator,
+        customTermDefinitionSeparator,
+        customCardSeparator,
+      }),
+    [
+      importText,
+      termDefinitionSeparator,
+      cardSeparator,
+      customTermDefinitionSeparator,
+      customCardSeparator,
+    ],
+  );
 
   const removeCard = (id: string) => {
     if (cards.length > 0) {
@@ -201,6 +231,40 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     setUploadingCardId(null);
   };
 
+  const openImport = () => {
+    setImportText("");
+    setTermDefinitionSeparator("tab");
+    setCardSeparator("newline");
+    setCustomTermDefinitionSeparator("");
+    setCustomCardSeparator("");
+    setIsImportOpen(true);
+  };
+
+  const closeImport = () => {
+    setIsImportOpen(false);
+  };
+
+  const handleImport = () => {
+    if (parsedImportCards.length === 0) {
+      return;
+    }
+
+    setCards((currentCards) => {
+      const hasOnlyBlankCards = currentCards.every(
+        (card) => !card.term.trim() && !card.definition.trim() && !card.image,
+      );
+
+      const importedCards = parsedImportCards.map((card, index) => ({
+        ...card,
+        id: `import-${Date.now()}-${index}`,
+      }));
+
+      return hasOnlyBlankCards ? importedCards : [...currentCards, ...importedCards];
+    });
+
+    closeImport();
+  };
+
   const handleSave = async () => {
     if (!title.trim()) {
       alert("Пожалуйста, введите название модуля");
@@ -307,9 +371,18 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       </div>
 
       {/* Инструменты списка */}
-      <div className="flex justify-end mb-6">
-         {/* Можно добавить доп действия */}
-      </div>
+      {mode === "edit" ? (
+        <div className="flex justify-start mb-10">
+          <button
+            type="button"
+            className="btn rounded-full border-none bg-[#303956] px-7 text-base font-semibold text-white hover:bg-[#3a4465]"
+            onClick={openImport}
+          >
+            <span className="text-2xl leading-none">+</span>
+            Импортировать
+          </button>
+        </div>
+      ) : null}
 
       {/* Список карточек */}
       <div className="space-y-6">
@@ -482,6 +555,367 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
         accept="image/*"
         onChange={handleFileChange}
       />
+
+      {isImportOpen ? (
+        <ImportModal
+          importText={importText}
+          setImportText={setImportText}
+          termDefinitionSeparator={termDefinitionSeparator}
+          setTermDefinitionSeparator={setTermDefinitionSeparator}
+          cardSeparator={cardSeparator}
+          setCardSeparator={setCardSeparator}
+          customTermDefinitionSeparator={customTermDefinitionSeparator}
+          setCustomTermDefinitionSeparator={setCustomTermDefinitionSeparator}
+          customCardSeparator={customCardSeparator}
+          setCustomCardSeparator={setCustomCardSeparator}
+          parsedCards={parsedImportCards}
+          onClose={closeImport}
+          onImport={handleImport}
+        />
+      ) : null}
     </div>
   );
+}
+
+function ImportModal({
+  importText,
+  setImportText,
+  termDefinitionSeparator,
+  setTermDefinitionSeparator,
+  cardSeparator,
+  setCardSeparator,
+  customTermDefinitionSeparator,
+  setCustomTermDefinitionSeparator,
+  customCardSeparator,
+  setCustomCardSeparator,
+  parsedCards,
+  onClose,
+  onImport,
+}: {
+  importText: string;
+  setImportText: (value: string) => void;
+  termDefinitionSeparator: ImportTermDefinitionSeparator;
+  setTermDefinitionSeparator: (value: ImportTermDefinitionSeparator) => void;
+  cardSeparator: ImportCardSeparator;
+  setCardSeparator: (value: ImportCardSeparator) => void;
+  customTermDefinitionSeparator: string;
+  setCustomTermDefinitionSeparator: (value: string) => void;
+  customCardSeparator: string;
+  setCustomCardSeparator: (value: string) => void;
+  parsedCards: TermCard[];
+  onClose: () => void;
+  onImport: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[200] flex flex-col bg-[#090821] text-white">
+      <button
+        type="button"
+        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#303956] text-white transition-colors hover:bg-[#3a4465]"
+        onClick={onClose}
+        aria-label="Закрыть импорт"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-7 w-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M6 18 18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+
+      <div className="flex-1 overflow-y-auto px-8 pb-28 pt-12">
+        <div className="mb-6 text-base text-white">
+          <span className="font-semibold">Импортировать данные.</span>{" "}
+          <span className="text-neutral-content">
+            Скопируйте и вставьте свои данные (из Word, Excel, Google Docs и т.п.)
+          </span>
+        </div>
+
+        <textarea
+          className="h-60 w-full resize-y border-2 border-white bg-transparent px-5 py-3 text-sm leading-6 text-white placeholder:text-neutral-content focus:outline-none"
+          placeholder={"Слово 1\tОпределение 1\nСлово 2\tОпределение 2\nСлово 3\tОпределение 3"}
+          value={importText}
+          onChange={(event) => setImportText(event.target.value)}
+          autoFocus
+        />
+
+        <div className="mt-10 grid max-w-3xl grid-cols-1 gap-10 md:grid-cols-2">
+          <ImportSeparatorGroup
+            title="Между термином и определением"
+            name="term-definition-separator"
+            value={termDefinitionSeparator}
+            onChange={setTermDefinitionSeparator}
+            customValue={customTermDefinitionSeparator}
+            onCustomValueChange={setCustomTermDefinitionSeparator}
+            options={[
+              { value: "tab", label: "Tab" },
+              { value: "comma", label: "Запятая" },
+              { value: "custom", label: "На выбор" },
+            ]}
+          />
+
+          <ImportSeparatorGroup
+            title="Между карточками"
+            name="card-separator"
+            value={cardSeparator}
+            onChange={setCardSeparator}
+            customValue={customCardSeparator}
+            onCustomValueChange={setCustomCardSeparator}
+            options={[
+              { value: "newline", label: "Разрыв строки" },
+              { value: "semicolon", label: "Точка с запятой" },
+              { value: "custom", label: "На выбор" },
+            ]}
+          />
+        </div>
+
+        <div className="mt-4">
+          <h2 className="text-xl font-semibold">
+            Предварительный просмотр{" "}
+            <span className="text-sm font-normal text-neutral-content">
+              {parsedCards.length} карточек
+            </span>
+          </h2>
+
+          {parsedCards.length ? (
+            <div className="mt-4 max-h-[34vh] max-w-5xl overflow-y-auto pr-2">
+              <div className="space-y-3">
+              {parsedCards.map((card, index) => (
+                <div
+                  key={`${card.term}-${index}`}
+                  className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-4 rounded-xl bg-[#303956] px-5 py-4 md:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)]"
+                >
+                  <div className="text-sm font-medium text-white">{index + 1}</div>
+                  <div>
+                    <div className="rounded-lg bg-[#090821] px-4 py-3 text-sm text-white">
+                      {card.term}
+                    </div>
+                    <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-neutral-content">
+                      Термин
+                    </div>
+                  </div>
+                  <div>
+                    <div className="rounded-lg bg-[#090821] px-4 py-3 text-sm text-neutral-content">
+                      {card.definition}
+                    </div>
+                    <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-neutral-content">
+                      Определение
+                    </div>
+                  </div>
+                </div>
+              ))}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-4 text-base text-neutral-content">
+              Пока нет данных для просмотра.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 flex justify-end gap-4 border-t border-[#303956] bg-[#090821] px-8 py-4">
+        <button
+          type="button"
+          className="btn rounded-full border border-[#586286] bg-transparent px-7 text-base font-semibold text-white hover:bg-[#151a36]"
+          onClick={onClose}
+        >
+          Отменить импорт
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary rounded-full px-8 text-base font-semibold"
+          onClick={onImport}
+          disabled={parsedCards.length === 0}
+        >
+          Импортировать
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ImportSeparatorGroup<T extends string>({
+  title,
+  name,
+  value,
+  onChange,
+  customValue,
+  onCustomValueChange,
+  options,
+}: {
+  title: string;
+  name: string;
+  value: T;
+  onChange: (value: T) => void;
+  customValue: string;
+  onCustomValueChange: (value: string) => void;
+  options: Array<{ value: T; label: string }>;
+}) {
+  return (
+    <fieldset>
+      <legend className="mb-5 text-base font-semibold text-white">{title}</legend>
+      <div className="space-y-5">
+        {options.map((option) => (
+          <label
+            key={option.value}
+            className="flex items-center gap-3 text-base font-semibold text-white"
+          >
+            <input
+              type="radio"
+              className="radio radio-sm border-white bg-transparent checked:border-white checked:bg-transparent checked:text-white"
+              name={name}
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+            />
+            {option.value === "custom" ? (
+              <input
+                type="text"
+                className="input h-12 min-h-12 w-48 rounded-md border-none bg-[#303956] px-4 text-base font-medium text-white placeholder:text-neutral-content focus:outline-none"
+                placeholder={option.label}
+                value={customValue}
+                onFocus={() => onChange(option.value)}
+                onChange={(event) => onCustomValueChange(event.target.value)}
+              />
+            ) : (
+              <span>{option.label}</span>
+            )}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function parseImportedCards({
+  text,
+  termDefinitionSeparator,
+  cardSeparator,
+  customTermDefinitionSeparator,
+  customCardSeparator,
+}: {
+  text: string;
+  termDefinitionSeparator: ImportTermDefinitionSeparator;
+  cardSeparator: ImportCardSeparator;
+  customTermDefinitionSeparator: string;
+  customCardSeparator: string;
+}) {
+  const rows = splitImportRows(text, cardSeparator, customCardSeparator);
+
+  return rows
+    .map((row) =>
+      splitImportRow(
+        row,
+        termDefinitionSeparator,
+        customTermDefinitionSeparator,
+      ),
+    )
+    .filter((card): card is TermCard => Boolean(card));
+}
+
+function splitImportRows(
+  text: string,
+  separator: ImportCardSeparator,
+  customSeparator: string,
+) {
+  if (!text.trim()) {
+    return [];
+  }
+
+  if (separator === "newline") {
+    return text.split(/\r?\n/);
+  }
+
+  if (separator === "semicolon") {
+    return text.split(";");
+  }
+
+  if (!customSeparator) {
+    return [];
+  }
+
+  return text.split(customSeparator);
+}
+
+function splitImportRow(
+  row: string,
+  separator: ImportTermDefinitionSeparator,
+  customSeparator: string,
+) {
+  const trimmedRow = row.trim();
+
+  if (!trimmedRow) {
+    return null;
+  }
+
+  const splitIndex = getTermDefinitionSplitIndex(
+    trimmedRow,
+    separator,
+    customSeparator,
+  );
+
+  if (splitIndex.index < 0) {
+    return null;
+  }
+
+  const term = trimmedRow.slice(0, splitIndex.index).trim();
+  const definition = trimmedRow
+    .slice(splitIndex.index + splitIndex.length)
+    .trim();
+
+  if (!term || !definition) {
+    return null;
+  }
+
+  return {
+    id: "",
+    term,
+    definition,
+  };
+}
+
+function getTermDefinitionSplitIndex(
+  row: string,
+  separator: ImportTermDefinitionSeparator,
+  customSeparator: string,
+) {
+  if (separator === "tab") {
+    const tabIndex = row.indexOf("\t");
+
+    if (tabIndex >= 0) {
+      return { index: tabIndex, length: 1 };
+    }
+
+    const multiSpaceMatch = /\s{2,}/.exec(row);
+
+    if (multiSpaceMatch?.index !== undefined) {
+      return {
+        index: multiSpaceMatch.index,
+        length: multiSpaceMatch[0].length,
+      };
+    }
+
+    return { index: -1, length: 0 };
+  }
+
+  if (separator === "comma") {
+    return { index: row.indexOf(","), length: 1 };
+  }
+
+  if (!customSeparator) {
+    return { index: -1, length: 0 };
+  }
+
+  return {
+    index: row.indexOf(customSeparator),
+    length: customSeparator.length,
+  };
 }
