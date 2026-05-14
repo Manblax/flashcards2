@@ -310,16 +310,16 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   };
 
   const moduleInputClassName =
-    "input w-full rounded-2xl border border-transparent bg-[#111233] px-5 text-lg font-medium text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[#15183d] focus:bg-[#1d2149] focus:border-[#a9b0ff] focus:shadow-[0_0_0_1px_rgba(169,176,255,0.45)] focus:outline-none";
+    "input w-full rounded-2xl border border-transparent bg-[var(--app-field)] px-5 text-lg font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const moduleTextareaClassName =
-    "textarea w-full min-h-[100px] rounded-2xl border border-transparent bg-[#111233] px-5 py-4 text-base text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[#15183d] focus:bg-[#1d2149] focus:border-[#a9b0ff] focus:shadow-[0_0_0_1px_rgba(169,176,255,0.45)] focus:outline-none";
+    "textarea w-full min-h-[100px] rounded-2xl border border-transparent bg-[var(--app-field)] px-5 py-4 text-base text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const termInputClassName =
-    "input h-14 min-h-14 w-full rounded-xl border border-transparent bg-[#090821] px-5 text-lg font-medium text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[#0d0d2a] focus:bg-[#161824] focus:border-[#a9b0ff] focus:shadow-[0_0_0_1px_rgba(169,176,255,0.45)] focus:outline-none";
+    "input h-14 min-h-14 w-full rounded-xl border border-transparent bg-[var(--app-field-deep)] px-5 text-lg font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-deep-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const definitionInputClassName =
-    "input h-16 min-h-16 w-full rounded-2xl border-2 border-[#a9b0ff] bg-[#171925] px-6 text-xl font-medium text-white placeholder:text-[#98a2ca] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[#171925] focus:border-[#a9b0ff] focus:shadow-none focus:outline-none";
+    "input h-16 min-h-16 w-full rounded-2xl border-2 border-[var(--app-focus)] bg-[var(--app-field-active)] px-6 text-xl font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[var(--app-field-active)] focus:border-[var(--app-focus)] focus:shadow-none focus:outline-none";
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -330,7 +330,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
              Назад к модулю
            </Link>
         ) : (
-           <h1 className="text-2xl font-bold text-white">Создать новый модуль</h1>
+           <h1 className="text-2xl font-bold text-[var(--app-text-strong)]">Создать новый модуль</h1>
         )}
         
         <button 
@@ -375,7 +375,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
         <div className="flex justify-start mb-10">
           <button
             type="button"
-            className="btn rounded-full border-none bg-[#303956] px-7 text-base font-semibold text-white hover:bg-[#3a4465]"
+            className="btn rounded-full border-none bg-[var(--app-panel-strong)] px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel-strong-hover)]"
             onClick={openImport}
           >
             <span className="text-2xl leading-none">+</span>
@@ -387,7 +387,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       {/* Список карточек */}
       <div className="space-y-6">
         {cards.map((card, index) => (
-          <div key={card.id} className="card rounded-[22px] border border-transparent bg-[#303956]">
+          <div key={card.id} className="card rounded-[22px] border border-transparent bg-[var(--app-panel-strong)]">
             <div className="card-body p-6 sm:p-7">
               {/* Хедер карточки */}
               <div className="flex justify-between items-center mb-4 border-b border-neutral/10 pb-4">
@@ -453,7 +453,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                       }}
                     />
                     {lookupCardId === card.id ? (
-                      <span className="loading loading-spinner loading-xs absolute right-4 top-1/2 -translate-y-1/2 text-[#dce0ff]"></span>
+                      <span className="loading loading-spinner loading-xs absolute right-4 top-1/2 -translate-y-1/2 text-[var(--app-focus)]"></span>
                     ) : null}
                   </div>
                   <label className="label px-0 pt-2">
@@ -467,7 +467,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                     (lookupCardId === card.id ||
                       lookupErrors[card.id] ||
                       lookupOptions[card.id]?.length) ? (
-                      <span className="label-text-alt text-[#a9b0ff] uppercase tracking-wider text-xs font-semibold">
+                      <span className="label-text-alt text-[var(--app-focus)] uppercase tracking-wider text-xs font-semibold">
                         Английский
                       </span>
                     ) : null}
@@ -479,7 +479,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                     lookupOptions[card.id]?.length) ? (
                     <div className="z-30 mt-8 w-full rounded-none bg-transparent p-0">
                       {lookupCardId === card.id ? (
-                        <div className="flex min-h-14 items-center gap-2 rounded-xl border border-[#d8dbef] px-5 py-4 text-base font-normal text-white">
+                        <div className="flex min-h-14 items-center gap-2 rounded-xl border border-[var(--app-border)] px-5 py-4 text-base font-normal text-[var(--app-text-strong)]">
                           <span className="loading loading-spinner loading-xs"></span>
                           Поиск определений...
                         </div>
@@ -493,7 +493,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                             <button
                               type="button"
                               key={`${definition.text}-${definitionIndex}`}
-                              className="block min-h-14 w-full rounded-xl border border-[#d8dbef] px-5 py-4 text-left text-base font-normal leading-relaxed text-white transition-colors hover:bg-[#171925] focus:bg-[#171925] focus:outline-none"
+                              className="block min-h-14 w-full rounded-xl border border-[var(--app-border)] px-5 py-4 text-left text-base font-normal leading-relaxed text-[var(--app-text-strong)] transition-colors hover:bg-[var(--app-field-active)] focus:bg-[var(--app-field-active)] focus:outline-none"
                               onMouseDown={(event) => event.preventDefault()}
                               onClick={() => applyDefinition(card.id, definition.text)}
                             >
@@ -509,7 +509,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 {/* Загрузка изображения */}
                 <div className="flex-none pt-1">
                    <button 
-                     className="w-24 h-20 border-2 border-dashed border-neutral/30 hover:border-neutral/60 rounded-lg flex flex-col items-center justify-center gap-1 text-neutral-content hover:text-white transition-colors overflow-hidden relative"
+                     className="w-24 h-20 border-2 border-dashed border-neutral/30 hover:border-neutral/60 rounded-lg flex flex-col items-center justify-center gap-1 text-neutral-content hover:text-[var(--app-text-strong)] transition-colors overflow-hidden relative"
                      onClick={() => handleImageClick(card.id)}
                    >
                       {card.image ? (
@@ -541,7 +541,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       {/* Кнопка добавления карточки */}
       <div className="flex justify-center mt-12 mb-20">
         <button 
-          className="btn btn-lg bg-base-300 hover:bg-base-200 text-white border-neutral/20 min-w-[200px]"
+          className="btn btn-lg bg-base-300 hover:bg-base-200 text-[var(--app-text-strong)] border-neutral/20 min-w-[200px]"
           onClick={addCard}
         >
           <span className="font-semibold text-lg">+ Добавить карточку</span>
@@ -607,10 +607,10 @@ function ImportModal({
   onImport: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-[#090821] text-white">
+    <div className="fixed inset-0 z-[200] flex flex-col bg-[var(--app-modal-bg)] text-[var(--app-text-strong)]">
       <button
         type="button"
-        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[#303956] text-white transition-colors hover:bg-[#3a4465]"
+        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-panel-strong)] text-[var(--app-text-strong)] transition-colors hover:bg-[var(--app-panel-strong-hover)]"
         onClick={onClose}
         aria-label="Закрыть импорт"
       >
@@ -631,7 +631,7 @@ function ImportModal({
       </button>
 
       <div className="flex-1 overflow-y-auto px-8 pb-28 pt-12">
-        <div className="mb-6 text-base text-white">
+        <div className="mb-6 text-base text-[var(--app-text-strong)]">
           <span className="font-semibold">Импортировать данные.</span>{" "}
           <span className="text-neutral-content">
             Скопируйте и вставьте свои данные (из Word, Excel, Google Docs и т.п.)
@@ -639,7 +639,7 @@ function ImportModal({
         </div>
 
         <textarea
-          className="h-60 w-full resize-y border-2 border-white bg-transparent px-5 py-3 text-sm leading-6 text-white placeholder:text-neutral-content focus:outline-none"
+          className="h-60 w-full resize-y border-2 border-[var(--app-text-strong)] bg-transparent px-5 py-3 text-sm leading-6 text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none"
           placeholder={"Слово 1\tОпределение 1\nСлово 2\tОпределение 2\nСлово 3\tОпределение 3"}
           value={importText}
           onChange={(event) => setImportText(event.target.value)}
@@ -690,11 +690,11 @@ function ImportModal({
               {parsedCards.map((card, index) => (
                 <div
                   key={`${card.term}-${index}`}
-                  className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-4 rounded-xl bg-[#303956] px-5 py-4 md:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)]"
+                  className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-4 rounded-xl bg-[var(--app-panel-strong)] px-5 py-4 md:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)]"
                 >
-                  <div className="text-sm font-medium text-white">{index + 1}</div>
+                  <div className="text-sm font-medium text-[var(--app-text-strong)]">{index + 1}</div>
                   <div>
-                    <div className="rounded-lg bg-[#090821] px-4 py-3 text-sm text-white">
+                    <div className="rounded-lg bg-[var(--app-field-deep)] px-4 py-3 text-sm text-[var(--app-text-strong)]">
                       {card.term}
                     </div>
                     <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-neutral-content">
@@ -702,7 +702,7 @@ function ImportModal({
                     </div>
                   </div>
                   <div>
-                    <div className="rounded-lg bg-[#090821] px-4 py-3 text-sm text-neutral-content">
+                    <div className="rounded-lg bg-[var(--app-field-deep)] px-4 py-3 text-sm text-neutral-content">
                       {card.definition}
                     </div>
                     <div className="mt-2 text-xs font-semibold uppercase tracking-wider text-neutral-content">
@@ -721,10 +721,10 @@ function ImportModal({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 flex justify-end gap-4 border-t border-[#303956] bg-[#090821] px-8 py-4">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-end gap-4 border-t border-[var(--app-panel-strong)] bg-[var(--app-modal-bg)] px-8 py-4">
         <button
           type="button"
-          className="btn rounded-full border border-[#586286] bg-transparent px-7 text-base font-semibold text-white hover:bg-[#151a36]"
+          className="btn rounded-full border border-[var(--app-border-strong)] bg-transparent px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel)]"
           onClick={onClose}
         >
           Отменить импорт
@@ -761,16 +761,16 @@ function ImportSeparatorGroup<T extends string>({
 }) {
   return (
     <fieldset>
-      <legend className="mb-5 text-base font-semibold text-white">{title}</legend>
+      <legend className="mb-5 text-base font-semibold text-[var(--app-text-strong)]">{title}</legend>
       <div className="space-y-5">
         {options.map((option) => (
           <label
             key={option.value}
-            className="flex items-center gap-3 text-base font-semibold text-white"
+            className="flex items-center gap-3 text-base font-semibold text-[var(--app-text-strong)]"
           >
             <input
               type="radio"
-              className="radio radio-sm border-white bg-transparent checked:border-white checked:bg-transparent checked:text-white"
+              className="radio radio-sm border-[var(--app-text-strong)] bg-transparent checked:border-[var(--app-text-strong)] checked:bg-transparent checked:text-[var(--app-text-strong)]"
               name={name}
               value={option.value}
               checked={value === option.value}
@@ -779,7 +779,7 @@ function ImportSeparatorGroup<T extends string>({
             {option.value === "custom" ? (
               <input
                 type="text"
-                className="input h-12 min-h-12 w-48 rounded-md border-none bg-[#303956] px-4 text-base font-medium text-white placeholder:text-neutral-content focus:outline-none"
+                className="input h-12 min-h-12 w-48 rounded-md border-none bg-[var(--app-panel-strong)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none"
                 placeholder={option.label}
                 value={customValue}
                 onFocus={() => onChange(option.value)}

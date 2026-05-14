@@ -1,7 +1,7 @@
 import { getModule } from "@/lib/api";
 import { getServerAuthToken } from "@/lib/server-auth";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import DeleteModuleButton from "@/components/DeleteModuleButton";
 import PronunciationButton from "@/components/PronunciationButton";
 
@@ -14,6 +14,11 @@ interface ModulePageProps {
 export default async function ModulePage({ params }: ModulePageProps) {
   const { id } = await params;
   const token = await getServerAuthToken();
+
+  if (!token) {
+    redirect(`/login?redirect=/module/${id}`);
+  }
+
   const module = await getModule(id, { token });
 
   if (!module) {
@@ -27,9 +32,9 @@ export default async function ModulePage({ params }: ModulePageProps) {
         <div className="mb-8">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2 text-white">{module.title}</h1>
+              <h1 className="text-3xl font-bold mb-2 text-[var(--app-text-strong)]">{module.title}</h1>
               <div className="flex items-center gap-2 text-sm text-neutral-content">
-                <span className="font-bold text-white">{module.termCount} терминов</span>
+                <span className="font-bold text-[var(--app-text-strong)]">{module.termCount} терминов</span>
                 <span>•</span>
                 <div className="flex items-center gap-1">
                   <div className="avatar placeholder w-5 h-5 rounded-full bg-warning text-warning-content flex items-center justify-center text-xs font-bold">
@@ -69,13 +74,13 @@ export default async function ModulePage({ params }: ModulePageProps) {
               </svg>
               Карточки
             </button>
-            <button className="btn btn-outline border-neutral/30 hover:bg-neutral/20 hover:border-neutral/30 text-neutral-content hover:text-white gap-2 px-6">
+            <button className="btn btn-outline border-neutral/30 hover:bg-neutral/20 hover:border-neutral/30 text-neutral-content hover:text-[var(--app-text-strong)] gap-2 px-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               Заучивание
             </button>
-             <button className="btn btn-outline border-neutral/30 hover:bg-neutral/20 hover:border-neutral/30 text-neutral-content hover:text-white gap-2 px-6">
+             <button className="btn btn-outline border-neutral/30 hover:bg-neutral/20 hover:border-neutral/30 text-neutral-content hover:text-[var(--app-text-strong)] gap-2 px-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
@@ -85,7 +90,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
         </div>
 
         {/* Заголовок списка */}
-        <h2 className="text-xl font-bold mb-4 text-white">Термины в этом модуле ({module.terms?.length || 0})</h2>
+        <h2 className="text-xl font-bold mb-4 text-[var(--app-text-strong)]">Термины в этом модуле ({module.terms?.length || 0})</h2>
 
         {/* Список карточек */}
         <div className="space-y-3">
@@ -95,7 +100,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
                 
                 {/* Термин (Левая колонка) */}
                 <div className="flex-1 min-w-0 border-r-0 sm:border-r border-neutral/20 sm:pr-8 w-full sm:w-auto pb-2 sm:pb-0 border-b sm:border-b-0">
-                  <span className="text-base sm:text-lg font-medium text-white block break-words">{term.term}</span>
+                  <span className="text-base sm:text-lg font-medium text-[var(--app-text-strong)] block break-words">{term.term}</span>
                 </div>
 
                 {/* Определение (Центральная колонка) */}
@@ -111,7 +116,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
                      </svg>
                    </button>
                    <PronunciationButton term={term.term} />
-                   <button className="btn btn-ghost btn-sm btn-circle text-neutral-content hover:text-white">
+                   <button className="btn btn-ghost btn-sm btn-circle text-neutral-content hover:text-[var(--app-text-strong)]">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
@@ -124,7 +129,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
 
           {/* Кнопка добавить термин (внизу, опционально, как в Quizlet) */}
           <div className="py-6 text-center">
-             <Link href={`/module/${module.id}/edit`} className="btn btn-lg bg-base-200 hover:bg-base-300 border-none text-white font-bold min-w-[250px]">
+             <Link href={`/module/${module.id}/edit`} className="btn btn-lg bg-base-200 hover:bg-base-300 border-none text-[var(--app-text-strong)] font-bold min-w-[250px]">
                 Добавить или удалить термины
              </Link>
           </div>

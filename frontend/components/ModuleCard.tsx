@@ -28,7 +28,7 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
           {/* Контент */}
           <div className="flex-1 min-w-0">
             {/* Заголовок */}
-            <h3 className="text-lg font-bold mb-1 text-white">
+            <h3 className="text-lg font-bold mb-1 text-[var(--app-text-strong)]">
               {module.title}
             </h3>
 
@@ -77,4 +77,3 @@ const getTermWord = (count: number): string => {
 };
 
 export default ModuleCard;
-

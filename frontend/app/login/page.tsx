@@ -1,15 +1,21 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthInput from "@/components/AuthInput";
 import { login, getGoogleAuthUrl } from "@/lib/api";
-import { persistAuthSession } from "@/lib/auth";
+import { getStoredUser, persistAuthSession } from "@/lib/auth";
+import { resolveSafeRedirect } from "@/lib/navigation";
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectTo = resolveSafeRedirect(searchParams.get("redirect"));
+  const registerHref =
+    redirectTo === "/"
+      ? "/register"
+      : `/register?redirect=${encodeURIComponent(redirectTo)}`;
   const [formData, setFormData] = useState({
     username: "", // Может быть email или username
     password: "",
@@ -18,6 +24,12 @@ function LoginPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const authError = searchParams.get("error");
+
+  useEffect(() => {
+    if (getStoredUser()) {
+      router.replace("/");
+    }
+  }, [router]);
 
   const handleFieldChange = (field: "username" | "password", value: string) => {
     setFormData((current) => ({ ...current, [field]: value }));
@@ -36,7 +48,7 @@ function LoginPageContent() {
       const data = await login(formData);
       persistAuthSession(data.access_token, data.user);
       
-      router.push("/");
+      router.replace(redirectTo);
       router.refresh();
     } catch (error: any) {
       const message =
@@ -52,12 +64,13 @@ function LoginPageContent() {
 
   const hasLoginError = Boolean(loginError);
   const errorInputClassName = hasLoginError
-    ? "border-error/70 bg-error/10 focus:border-error text-white"
+    ? "border-error/70 bg-error/10 focus:border-error text-[var(--app-text-strong)]"
     : "";
 
-  return <LoginPageLayout authError={authError} form={(
+  return <LoginPageLayout authError={authError} registerHref={registerHref} form={(
     <form onSubmit={handleSubmit} className="space-y-4">
       <AuthInput
+        id="login-username"
         label="Эл. почта или имя пользователя"
         type="text"
         placeholder="user@email.com"
@@ -65,11 +78,13 @@ function LoginPageContent() {
         onChange={(e) => handleFieldChange("username", e.target.value)}
         className={errorInputClassName}
         aria-invalid={hasLoginError}
+        autoComplete="username"
         required
       />
 
       <div className="relative">
         <AuthInput
+          id="login-password"
           label="Пароль"
           type={showPassword ? "text" : "password"}
           placeholder="••••••••"
@@ -77,12 +92,14 @@ function LoginPageContent() {
           onChange={(e) => handleFieldChange("password", e.target.value)}
           className={errorInputClassName}
           aria-invalid={hasLoginError}
+          autoComplete="current-password"
           required
         />
         <button
           type="button"
-          className="absolute right-4 top-[38px] text-neutral-content hover:text-white"
+          className="absolute right-4 top-[38px] text-neutral-content hover:text-[var(--app-text-strong)]"
           onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
         >
           {showPassword ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -104,15 +121,9 @@ function LoginPageContent() {
         </p>
       )}
 
-      <div className="flex justify-end">
-        <Link href="#" className="text-sm text-primary hover:underline font-medium">
-          Забыли пароль?
-        </Link>
-      </div>
-
       <button
         type="submit"
-        className="btn btn-primary w-full rounded-xl mt-2 font-bold text-white"
+        className="btn btn-primary w-full rounded-xl mt-2 font-bold text-primary-content"
         disabled={isLoading}
       >
         {isLoading ? <span className="loading loading-spinner"></span> : "Войти"}
@@ -149,14 +160,19 @@ function LoginPageContent() {
 function LoginPageLayout({
   authError,
   form,
+  registerHref = "/register",
 }: {
   authError?: string | null;
   form: React.ReactNode;
+  registerHref?: string;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4 py-10">
       <div className="max-w-md w-full">
-        <h1 className="text-3xl font-bold text-white mb-8">Вход</h1>
+        <h1 className="text-3xl font-bold text-[var(--app-text-strong)] mb-3">Вход</h1>
+        <p className="mb-8 text-neutral-content">
+          Войдите, чтобы открыть библиотеку и продолжить работу с модулями.
+        </p>
 
         {form}
 
@@ -168,7 +184,7 @@ function LoginPageLayout({
 
         <p className="text-center mt-6 text-neutral-content">
           Нет аккаунта?{" "}
-          <Link href="/register" className="text-primary hover:underline">
+          <Link href={registerHref} className="text-primary hover:underline">
             Зарегистрироваться
           </Link>
         </p>

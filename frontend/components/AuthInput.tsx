@@ -5,11 +5,11 @@ interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export default function AuthInput({ label, className = "", ...props }: AuthInputProps) {
   return (
     <div className="form-control w-full">
-      <label className="label pl-0 pb-1">
+      <label className="label pl-0 pb-1" htmlFor={props.id}>
         <span className="label-text text-neutral-content font-medium text-sm">{label}</span>
       </label>
       <input
-        className={`input w-full bg-base-200/50 border-transparent focus:border-primary/50 focus:bg-base-200 rounded-xl text-white placeholder:text-neutral-content/40 transition-all ${className}`}
+        className={`input w-full bg-base-200/50 border-transparent focus:border-primary/50 focus:bg-base-200 rounded-xl text-[var(--app-text-strong)] placeholder:text-neutral-content/40 transition-all ${className}`}
         {...props}
       />
     </div>

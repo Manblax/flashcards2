@@ -1,83 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthInput from "@/components/AuthInput";
-import { register, getGoogleAuthUrl } from "@/lib/api";
+import { getGoogleAuthUrl, register } from "@/lib/api";
+import { getStoredUser, persistAuthSession } from "@/lib/auth";
+import { resolveSafeRedirect } from "@/lib/navigation";
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = resolveSafeRedirect(searchParams.get("redirect"));
+  const loginHref =
+    redirectTo === "/"
+      ? "/login"
+      : `/login?redirect=${encodeURIComponent(redirectTo)}`;
   const [formData, setFormData] = useState({
     email: "",
     username: "",
     password: "",
-    confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (getStoredUser()) {
+      router.replace("/");
+    }
+  }, [router]);
+
+  const handleFieldChange = (
+    field: "email" | "username" | "password",
+    value: string,
+  ) => {
+    setFormData((current) => ({ ...current, [field]: value }));
+
+    if (registerError) {
+      setRegisterError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert("Пароли не совпадают");
-      return;
-    }
-
+    setRegisterError(null);
     setIsLoading(true);
+
     try {
-      await register({
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-      });
-      alert("Регистрация успешна! Теперь войдите.");
-      router.push("/login");
+      const data = await register(formData);
+      persistAuthSession(data.access_token, data.user);
+      router.replace(redirectTo);
+      router.refresh();
     } catch (error: any) {
-      alert(error.message || "Ошибка регистрации");
+      const message =
+        error?.message === "User with this email or username already exists"
+          ? "Пользователь с такой почтой или именем уже существует."
+          : error?.message || "Не удалось зарегистрироваться. Попробуйте еще раз.";
+
+      setRegisterError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const hasRegisterError = Boolean(registerError);
+  const errorInputClassName = hasRegisterError
+    ? "border-error/70 bg-error/10 focus:border-error text-[var(--app-text-strong)]"
+    : "";
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-md w-full">
-        <h1 className="text-3xl font-bold text-white mb-8">Регистрация</h1>
-        
+    <RegisterPageLayout
+      loginHref={loginHref}
+      form={(
         <form onSubmit={handleSubmit} className="space-y-4">
           <AuthInput
+            id="register-email"
             label="Эл. почта"
             type="email"
             placeholder="user@email.com"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) => handleFieldChange("email", e.target.value)}
+            className={errorInputClassName}
+            aria-invalid={hasRegisterError}
+            autoComplete="email"
             required
           />
-          
+
           <AuthInput
+            id="register-username"
             label="Имя пользователя"
             type="text"
             placeholder="username"
             value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            onChange={(e) => handleFieldChange("username", e.target.value)}
+            className={errorInputClassName}
+            aria-invalid={hasRegisterError}
+            autoComplete="username"
             required
           />
 
           <div className="relative">
             <AuthInput
+              id="register-password"
               label="Пароль"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) => handleFieldChange("password", e.target.value)}
+              className={errorInputClassName}
+              aria-invalid={hasRegisterError}
+              autoComplete="new-password"
               required
             />
             <button
               type="button"
-              className="absolute right-4 top-[38px] text-neutral-content hover:text-white"
+              className="absolute right-4 top-[38px] text-neutral-content hover:text-[var(--app-text-strong)]"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
             >
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -93,18 +133,15 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          <AuthInput
-            label="Повторить пароль"
-            type="password"
-            placeholder="••••••••"
-            value={formData.confirmPassword}
-            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-            required
-          />
+          {registerError && (
+            <p className="text-sm text-error font-medium -mt-1" role="alert">
+              {registerError}
+            </p>
+          )}
 
           <button
             type="submit"
-            className="btn btn-primary w-full rounded-xl mt-6 font-bold text-white"
+            className="btn btn-primary w-full rounded-xl mt-2 font-bold text-primary-content"
             disabled={isLoading}
           >
             {isLoading ? <span className="loading loading-spinner"></span> : "Зарегистрироваться"}
@@ -135,14 +172,47 @@ export default function RegisterPage() {
             Продолжить через Google
           </a>
         </form>
+      )}
+    />
+  );
+}
+
+function RegisterPageLayout({
+  form,
+  loginHref = "/login",
+}: {
+  form: React.ReactNode;
+  loginHref?: string;
+}) {
+  return (
+    <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-bold text-[var(--app-text-strong)] mb-3">Регистрация</h1>
+        <p className="mb-8 text-neutral-content">
+          Создайте аккаунт, чтобы сохранять свои модули и продолжать занятия с любого устройства.
+        </p>
+
+        {form}
 
         <p className="text-center mt-6 text-neutral-content">
           Уже есть аккаунт?{" "}
-          <Link href="/login" className="text-primary hover:underline">
+          <Link href={loginHref} className="text-primary hover:underline">
             Войти
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+function RegisterPageFallback() {
+  return <RegisterPageLayout form={<div className="loading loading-spinner text-primary" />} />;
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterPageFallback />}>
+      <RegisterPageContent />
+    </Suspense>
   );
 }

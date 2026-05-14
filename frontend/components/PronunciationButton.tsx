@@ -10,7 +10,7 @@ interface PronunciationButtonProps {
 
 export default function PronunciationButton({
   term,
-  className = "btn btn-ghost btn-sm btn-circle text-neutral-content hover:text-white",
+  className = "btn btn-ghost btn-sm btn-circle text-neutral-content hover:text-[var(--app-text-strong)]",
 }: PronunciationButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);

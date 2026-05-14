@@ -1,29 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AUTH_STATE_CHANGE_EVENT,
   getStoredUser,
   type AuthUser,
 } from "@/lib/auth";
+import {
+  applyTheme,
+  getStoredTheme,
+  THEMES,
+  type AppTheme,
+} from "@/lib/theme";
 
 type PronunciationVariant = "uk" | "us";
 
 const PRONUNCIATION_SETTING_KEY = "preferred-pronunciation-variant";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
   const [pronunciationVariant, setPronunciationVariant] =
     useState<PronunciationVariant>("uk");
+  const [theme, setTheme] = useState<AppTheme>(THEMES.darkClassic);
 
   useEffect(() => {
     const syncUser = () => {
-      setUser(getStoredUser());
+      const storedUser = getStoredUser();
+      setUser(storedUser);
+      setHasCheckedAuth(true);
+
+      if (!storedUser) {
+        router.replace("/login?redirect=/settings");
+      }
     };
 
     const handleAuthStateChange = (event: Event) => {
       const { detail } = event as CustomEvent<AuthUser | null>;
-      setUser(detail ?? getStoredUser());
+      const nextUser = detail ?? getStoredUser();
+      setUser(nextUser);
+      setHasCheckedAuth(true);
+
+      if (!nextUser) {
+        router.replace("/login?redirect=/settings");
+      }
     };
 
     syncUser();
@@ -32,7 +54,7 @@ export default function SettingsPage() {
     return () => {
       window.removeEventListener(AUTH_STATE_CHANGE_EVENT, handleAuthStateChange);
     };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const storedVariant = localStorage.getItem(PRONUNCIATION_SETTING_KEY);
@@ -40,6 +62,8 @@ export default function SettingsPage() {
     if (storedVariant === "uk" || storedVariant === "us") {
       setPronunciationVariant(storedVariant);
     }
+
+    setTheme(getStoredTheme());
   }, []);
 
   const handlePronunciationVariantChange = (variant: PronunciationVariant) => {
@@ -47,22 +71,35 @@ export default function SettingsPage() {
     localStorage.setItem(PRONUNCIATION_SETTING_KEY, variant);
   };
 
+  const handleThemeChange = (nextTheme: AppTheme) => {
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+  };
+
   const initials = user?.username ? user.username.slice(0, 2).toUpperCase() : "MA";
+
+  if (!hasCheckedAuth || !user) {
+    return (
+      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-6">
+        <span className="loading loading-spinner loading-lg text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="mb-12 text-4xl font-semibold tracking-normal text-white sm:text-5xl">
+      <h1 className="mb-12 text-4xl font-semibold tracking-normal text-[var(--app-text-strong)] sm:text-5xl">
         Настройки
       </h1>
 
       <section>
-        <div className="overflow-hidden rounded-none border-x border-t border-[#29315c]">
-          <div className="flex items-center gap-5 border-b border-[#29315c] px-7 py-6">
+        <div className="overflow-hidden rounded-none border-x border-t border-[var(--app-border)]">
+          <div className="flex items-center gap-5 border-b border-[var(--app-border)] px-7 py-6">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral text-base font-semibold text-neutral-content">
               {initials}
             </div>
             <div className="min-w-0">
-              <div className="truncate text-lg font-semibold text-white">
+              <div className="truncate text-lg font-semibold text-[var(--app-text-strong)]">
                 {user?.username || "Пользователь"}
               </div>
               <div className="truncate text-base font-normal text-neutral-content">
@@ -79,12 +116,65 @@ export default function SettingsPage() {
             label="Эл. почта"
             value={user?.email || "Не указано"}
           />
+          <ThemeSettingsRow
+            value={theme}
+            onChange={handleThemeChange}
+          />
           <PronunciationSettingsRow
             value={pronunciationVariant}
             onChange={handlePronunciationVariantChange}
           />
         </div>
       </section>
+    </div>
+  );
+}
+
+function ThemeSettingsRow({
+  value,
+  onChange,
+}: {
+  value: AppTheme;
+  onChange: (value: AppTheme) => void;
+}) {
+  return (
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+      <div>
+        <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
+          Тема
+        </div>
+        <div className="text-base font-normal text-neutral-content">
+          Выберите цветовую тему интерфейса.
+        </div>
+      </div>
+
+      <label className="relative block">
+        <select
+          className="h-14 w-full appearance-none rounded-xl border border-[var(--app-border-strong)] bg-[var(--app-field-deep)] px-4 pr-12 text-base font-medium text-[var(--app-text-strong)] outline-none transition-colors hover:border-[var(--app-focus)] focus:border-[var(--app-focus)]"
+          value={value}
+          onChange={(event) => onChange(event.target.value as AppTheme)}
+        >
+          <option value={THEMES.darkClassic}>Темная классик</option>
+          <option value={THEMES.lightClassic}>Светлая классик</option>
+          <option value={THEMES.light}>DaisyUI light</option>
+          <option value={THEMES.dark}>DaisyUI dark</option>
+        </select>
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-neutral-content">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </span>
+      </label>
     </div>
   );
 }
@@ -97,9 +187,9 @@ function PronunciationSettingsRow({
   onChange: (value: PronunciationVariant) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[#29315c] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
       <div>
-        <div className="mb-2 text-lg font-semibold text-white">
+        <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Звук и транскрипция по умолчанию для новых слов
         </div>
         <div className="text-base font-normal text-neutral-content">
@@ -109,7 +199,7 @@ function PronunciationSettingsRow({
 
       <label className="relative block">
         <select
-          className="h-14 w-full appearance-none rounded-xl border border-[#6f79a7] bg-[#0f1130] px-4 pr-12 text-base font-medium text-white outline-none transition-colors hover:border-[#a9b0ff] focus:border-[#a9b0ff]"
+          className="h-14 w-full appearance-none rounded-xl border border-[var(--app-border-strong)] bg-[var(--app-field-deep)] px-4 pr-12 text-base font-medium text-[var(--app-text-strong)] outline-none transition-colors hover:border-[var(--app-focus)] focus:border-[var(--app-focus)]"
           value={value}
           onChange={(event) =>
             onChange(event.target.value as PronunciationVariant)
@@ -140,16 +230,16 @@ function PronunciationSettingsRow({
 
 function SettingsRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-h-24 items-center justify-between gap-8 border-b border-[#29315c] px-7 py-6">
+    <div className="flex min-h-24 items-center justify-between gap-8 border-b border-[var(--app-border)] px-7 py-6">
       <div className="min-w-0">
-        <div className="mb-3 text-lg font-semibold text-white">{label}</div>
+        <div className="mb-3 text-lg font-semibold text-[var(--app-text-strong)]">{label}</div>
         <div className="truncate text-lg font-normal text-neutral-content">
           {value}
         </div>
       </div>
       <button
         type="button"
-        className="shrink-0 text-lg font-semibold text-[#a9b0ff] transition-colors hover:text-white"
+        className="shrink-0 text-lg font-semibold text-[var(--app-focus)] transition-colors hover:text-[var(--app-text-strong)]"
       >
         Редактировать
       </button>

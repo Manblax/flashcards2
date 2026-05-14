@@ -38,7 +38,7 @@ const Sidebar = () => {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
                   pathname === item.href
-                    ? "bg-neutral/50 text-white"
+                    ? "bg-neutral/50 text-[var(--app-text-strong)]"
                     : "text-neutral-content hover:bg-neutral/30"
                 }`}
               >
@@ -54,4 +54,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-

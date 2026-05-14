@@ -1,6 +1,7 @@
 import ModuleForm from "@/components/ModuleForm";
 import { getModule } from "@/lib/api";
 import { getServerAuthToken } from "@/lib/server-auth";
+import { redirect } from "next/navigation";
 
 interface EditPageProps {
   params: Promise<{
@@ -11,6 +12,11 @@ interface EditPageProps {
 export default async function EditPage({ params }: EditPageProps) {
   const { id } = await params;
   const token = await getServerAuthToken();
+
+  if (!token) {
+    redirect(`/login?redirect=/module/${id}/edit`);
+  }
+
   const module = await getModule(id, { token });
 
   if (!module) {

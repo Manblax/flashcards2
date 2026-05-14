@@ -2,6 +2,7 @@ import ModuleCard from "@/components/ModuleCard";
 import { getModules } from "@/lib/api";
 import { getServerAuthToken } from "@/lib/server-auth";
 import { Module } from "@/types/module";
+import Link from "next/link";
 
 export default async function Home() {
   let recentModules: Module[] = [];
@@ -15,15 +16,15 @@ export default async function Home() {
     }
   }
 
+  if (!token) {
+    return <GuestHome />;
+  }
+
   return (
     <div className="container mx-auto px-6 py-8 max-w-7xl">
       <section>
-        <h2 className="text-2xl font-bold mb-6 text-white">Недавние</h2>
-        {!token ? (
-          <div className="text-neutral-content">
-            Войдите, чтобы увидеть свои модули.
-          </div>
-        ) : recentModules.length > 0 ? (
+        <h2 className="text-2xl font-bold mb-6 text-[var(--app-text-strong)]">Недавние</h2>
+        {recentModules.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {recentModules.map((module) => (
               <ModuleCard key={module.id} module={module} />
@@ -35,6 +36,99 @@ export default async function Home() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function GuestHome() {
+  return (
+    <div className="min-h-[calc(100vh-73px)] px-6 py-12 sm:py-16">
+      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(22rem,1fr)]">
+        <section className="max-w-xl">
+          <div className="mb-7 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-primary-content">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-6 w-6"
+                aria-hidden="true"
+              >
+                <path d="M9 3v18m6-18v18M3 9h18M3 15h18" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold text-[var(--app-text-strong)]">Q</span>
+          </div>
+
+          <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-normal text-[var(--app-text-strong)] sm:text-5xl">
+            Учите слова по своим модулям
+          </h1>
+          <p className="mt-5 max-w-lg text-lg leading-8 text-neutral-content">
+            Собирайте термины, слушайте произношение и возвращайтесь к повторению без лишней навигации.
+          </p>
+
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <Link href="/register" className="btn btn-primary min-h-12 rounded-xl px-7 text-base font-bold text-primary-content">
+              Зарегистрироваться
+            </Link>
+            <Link href="/login" className="btn min-h-12 rounded-xl border border-[var(--app-border)] bg-transparent px-7 text-base font-bold text-[var(--app-text-strong)] hover:border-[var(--app-focus)] hover:bg-[var(--app-panel)]">
+              Войти
+            </Link>
+          </div>
+        </section>
+
+        <section
+          aria-label="Пример учебного модуля"
+          className="overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)]"
+        >
+          <div className="border-b border-[var(--app-border)] px-6 py-5">
+            <div className="text-sm font-semibold uppercase tracking-normal text-accent">
+              Сегодня
+            </div>
+            <h2 className="mt-2 text-2xl font-bold text-[var(--app-text-strong)]">
+              English: phrasal verbs
+            </h2>
+            <p className="mt-1 text-sm text-neutral-content">24 термина</p>
+          </div>
+
+          <div className="divide-y divide-[var(--app-border)]">
+            <PreviewTerm term="look up" definition="искать информацию" />
+            <PreviewTerm term="carry on" definition="продолжать" />
+            <PreviewTerm term="figure out" definition="понять, разобраться" />
+          </div>
+
+          <div className="grid grid-cols-3 gap-px bg-[var(--app-border)] text-center">
+            <PreviewStat value="18" label="выучено" />
+            <PreviewStat value="6" label="повторить" />
+            <PreviewStat value="4m" label="сессия" />
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function PreviewTerm({
+  term,
+  definition,
+}: {
+  term: string;
+  definition: string;
+}) {
+  return (
+    <div className="grid gap-2 px-6 py-5 sm:grid-cols-[10rem_1fr]">
+      <div className="font-semibold text-[var(--app-text-strong)]">{term}</div>
+      <div className="text-neutral-content">{definition}</div>
+    </div>
+  );
+}
+
+function PreviewStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="bg-[var(--app-panel)] px-4 py-5">
+      <div className="text-xl font-bold text-[var(--app-text-strong)]">{value}</div>
+      <div className="mt-1 text-sm text-neutral-content">{label}</div>
     </div>
   );
 }
