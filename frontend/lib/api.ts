@@ -1,4 +1,5 @@
 import type { Module } from "@/types/module";
+import { getDictionarySourcePreference } from "@/lib/dictionary-settings";
 
 const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || PUBLIC_API_URL;
@@ -183,8 +184,13 @@ export async function lookupDictionary(
   word: string,
   options: RequestOptions = {},
 ): Promise<DictionaryLookupResult> {
+  const source = getDictionarySourcePreference();
+  const query = new URLSearchParams({
+    word,
+    source,
+  });
   const res = await apiFetch(
-    `/dictionary/lookup?word=${encodeURIComponent(word)}`,
+    `/dictionary/lookup?${query.toString()}`,
     {
       cache: "no-store",
     },

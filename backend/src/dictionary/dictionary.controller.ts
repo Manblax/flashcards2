@@ -14,11 +14,16 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiProduces,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { DictionaryService } from './dictionary.service';
+import type {
+  DictionaryPreferences,
+  DictionarySource,
+} from './dictionary.types';
 import { validateLookupWord } from './dictionary.utils';
 
 @ApiTags('Dictionary')
@@ -32,16 +37,26 @@ export class DictionaryController {
   @ApiOperation({
     summary: 'Look up definitions, pronunciation, and audio for a word',
   })
+  @ApiQuery({
+    name: 'source',
+    required: false,
+    enum: ['cambridge', 'oxford'],
+    description: 'Dictionary used for definitions, IPA, and audio',
+  })
   @ApiResponse({ status: 400, description: 'Invalid word' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async lookup(@Query('word') word?: string) {
+  async lookup(@Query('word') word?: string, @Query('source') source?: string) {
     const normalizedWord = validateLookupWord(word);
 
     if (!normalizedWord) {
       throw new BadRequestException('Invalid word');
     }
 
-    return this.dictionaryService.lookup(normalizedWord);
+    const preferences: DictionaryPreferences = {
+      source: parseDictionarySource(source),
+    };
+
+    return this.dictionaryService.lookup(normalizedWord, preferences);
   }
 
   @Get('audio/:id')
@@ -70,4 +85,16 @@ export class DictionaryController {
     res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
     res.send(buffer);
   }
+}
+
+function parseDictionarySource(value?: string): DictionarySource {
+  if (!value) {
+    return 'cambridge';
+  }
+
+  if (value === 'cambridge' || value === 'oxford') {
+    return value;
+  }
+
+  throw new BadRequestException('Invalid dictionary source');
 }

@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   DictionaryAudioVariant,
+  DictionaryPreferences,
   InternalDictionaryLookupResult,
   PublicDictionaryLookupResult,
 } from './dictionary.types';
@@ -21,9 +22,19 @@ export class DictionaryService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async lookup(normalizedWord: string): Promise<PublicDictionaryLookupResult> {
+  async lookup(
+    normalizedWord: string,
+    preferences: DictionaryPreferences = {
+      source: 'cambridge',
+    },
+  ): Promise<PublicDictionaryLookupResult> {
     const cached = await this.prisma.dictionaryEntry.findUnique({
-      where: { normalizedWord },
+      where: {
+        normalizedWord_dictionarySource: {
+          normalizedWord,
+          dictionarySource: preferences.source,
+        },
+      },
     });
 
     if (cached && this.isCacheFresh(cached.expiresAt)) {
@@ -33,14 +44,19 @@ export class DictionaryService {
       };
     }
 
-    const internalResult = await this.fetchLookup(normalizedWord);
+    const internalResult = await this.fetchLookup(normalizedWord, preferences);
     const publicPayload = await this.materializeAudioUrls(internalResult);
     const storedPayload = this.toJson(publicPayload);
     const storedSources = this.toJson(publicPayload.sources);
     const expiresAt = this.getExpiresAt();
 
     await this.prisma.dictionaryEntry.upsert({
-      where: { normalizedWord },
+      where: {
+        normalizedWord_dictionarySource: {
+          normalizedWord,
+          dictionarySource: preferences.source,
+        },
+      },
       update: {
         payload: storedPayload,
         sourceMap: storedSources,
@@ -48,6 +64,7 @@ export class DictionaryService {
       },
       create: {
         normalizedWord,
+        dictionarySource: preferences.source,
         payload: storedPayload,
         sourceMap: storedSources,
         expiresAt,
@@ -78,6 +95,7 @@ export class DictionaryService {
 
   private async fetchLookup(
     normalizedWord: string,
+    preferences: DictionaryPreferences,
   ): Promise<InternalDictionaryLookupResult> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -85,6 +103,7 @@ export class DictionaryService {
     try {
       const url = new URL('/internal/lookup', this.serviceUrl);
       url.searchParams.set('word', normalizedWord);
+      url.searchParams.set('source', preferences.source);
 
       const response = await fetch(url, {
         signal: controller.signal,
@@ -112,8 +131,16 @@ export class DictionaryService {
     return {
       ...result,
       audio: {
-        uk: await this.materializeAudioUrl('uk', result.audio.uk, result.sources.audio),
-        us: await this.materializeAudioUrl('us', result.audio.us, result.sources.audio),
+        uk: await this.materializeAudioUrl(
+          'uk',
+          result.audio.uk,
+          result.sources.audio,
+        ),
+        us: await this.materializeAudioUrl(
+          'us',
+          result.audio.us,
+          result.sources.audio,
+        ),
       },
     };
   }
@@ -127,7 +154,10 @@ export class DictionaryService {
       return undefined;
     }
 
-    const id = createHash('sha256').update(sourceUrl).digest('hex').slice(0, 24);
+    const id = createHash('sha256')
+      .update(sourceUrl)
+      .digest('hex')
+      .slice(0, 24);
 
     await this.prisma.dictionaryAudio.upsert({
       where: { id },

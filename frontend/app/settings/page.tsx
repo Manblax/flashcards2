@@ -13,8 +13,19 @@ import {
   THEMES,
   type AppTheme,
 } from "@/lib/theme";
+import {
+  DICTIONARY_SOURCE_SETTING_KEY,
+  getDictionarySourcePreference,
+  type DictionarySourcePreference,
+} from "@/lib/dictionary-settings";
 
 type PronunciationVariant = "uk" | "us";
+
+interface SavedSettings {
+  theme: AppTheme;
+  pronunciationVariant: PronunciationVariant;
+  dictionarySource: DictionarySourcePreference;
+}
 
 const PRONUNCIATION_SETTING_KEY = "preferred-pronunciation-variant";
 
@@ -25,6 +36,10 @@ export default function SettingsPage() {
   const [pronunciationVariant, setPronunciationVariant] =
     useState<PronunciationVariant>("uk");
   const [theme, setTheme] = useState<AppTheme>(THEMES.darkClassic);
+  const [dictionarySource, setDictionarySource] =
+    useState<DictionarySourcePreference>("cambridge");
+  const [savedSettings, setSavedSettings] = useState<SavedSettings | null>(null);
+  const [hasSaved, setHasSaved] = useState(false);
 
   useEffect(() => {
     const syncUser = () => {
@@ -58,23 +73,54 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const storedVariant = localStorage.getItem(PRONUNCIATION_SETTING_KEY);
+    const nextPronunciationVariant =
+      storedVariant === "uk" || storedVariant === "us" ? storedVariant : "uk";
+    const nextTheme = getStoredTheme();
+    const nextDictionarySource = getDictionarySourcePreference();
 
-    if (storedVariant === "uk" || storedVariant === "us") {
-      setPronunciationVariant(storedVariant);
-    }
-
-    setTheme(getStoredTheme());
+    setPronunciationVariant(nextPronunciationVariant);
+    setTheme(nextTheme);
+    setDictionarySource(nextDictionarySource);
+    setSavedSettings({
+      theme: nextTheme,
+      pronunciationVariant: nextPronunciationVariant,
+      dictionarySource: nextDictionarySource,
+    });
   }, []);
 
   const handlePronunciationVariantChange = (variant: PronunciationVariant) => {
     setPronunciationVariant(variant);
-    localStorage.setItem(PRONUNCIATION_SETTING_KEY, variant);
+    setHasSaved(false);
   };
 
   const handleThemeChange = (nextTheme: AppTheme) => {
     setTheme(nextTheme);
-    applyTheme(nextTheme);
+    setHasSaved(false);
   };
+
+  const handleDictionarySourceChange = (
+    source: DictionarySourcePreference,
+  ) => {
+    setDictionarySource(source);
+    setHasSaved(false);
+  };
+
+  const handleSave = () => {
+    applyTheme(theme);
+    localStorage.setItem(
+      PRONUNCIATION_SETTING_KEY,
+      pronunciationVariant,
+    );
+    localStorage.setItem(DICTIONARY_SOURCE_SETTING_KEY, dictionarySource);
+    setSavedSettings({ theme, pronunciationVariant, dictionarySource });
+    setHasSaved(true);
+  };
+
+  const hasChanges =
+    savedSettings !== null &&
+    (theme !== savedSettings.theme ||
+      pronunciationVariant !== savedSettings.pronunciationVariant ||
+      dictionarySource !== savedSettings.dictionarySource);
 
   const initials = user?.username ? user.username.slice(0, 2).toUpperCase() : "MA";
 
@@ -124,6 +170,29 @@ export default function SettingsPage() {
             value={pronunciationVariant}
             onChange={handlePronunciationVariantChange}
           />
+          <DictionarySourceSettingsRow
+            value={dictionarySource}
+            onChange={handleDictionarySourceChange}
+          />
+        </div>
+        <div className="mt-6 flex items-center justify-end gap-4">
+          {hasSaved && (
+            <span
+              className="text-sm font-medium text-success"
+              role="status"
+              aria-live="polite"
+            >
+              Настройки сохранены
+            </span>
+          )}
+          <button
+            type="button"
+            className="btn btn-primary min-w-40 px-8"
+            onClick={handleSave}
+            disabled={!hasChanges}
+          >
+            Сохранить
+          </button>
         </div>
       </section>
     </div>
@@ -225,6 +294,61 @@ function PronunciationSettingsRow({
         </span>
       </label>
     </div>
+  );
+}
+
+function DictionarySourceSettingsRow({
+  value,
+  onChange,
+}: {
+  value: DictionarySourcePreference;
+  onChange: (value: DictionarySourcePreference) => void;
+}) {
+  return (
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+      <div>
+        <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
+          Словарь
+        </div>
+        <div className="text-base font-normal text-neutral-content">
+          Выберите источник значений, транскрипции и произношения.
+        </div>
+      </div>
+
+      <label className="relative block">
+        <select
+          className="h-14 w-full appearance-none rounded-xl border border-[var(--app-border-strong)] bg-[var(--app-field-deep)] px-4 pr-12 text-base font-medium text-[var(--app-text-strong)] outline-none transition-colors hover:border-[var(--app-focus)] focus:border-[var(--app-focus)]"
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value as DictionarySourcePreference)
+          }
+        >
+          <option value="cambridge">Cambridge Dictionary</option>
+          <option value="oxford">Oxford Learner&apos;s Dictionaries</option>
+        </select>
+        <SelectChevron />
+      </label>
+    </div>
+  );
+}
+
+function SelectChevron() {
+  return (
+    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-neutral-content">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          fillRule="evenodd"
+          d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </span>
   );
 }
 

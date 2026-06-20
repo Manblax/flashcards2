@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import type { ProviderLookupResult } from './dictionary.types';
+import type {
+  DictionarySource,
+  ProviderLookupResult,
+} from './dictionary.types';
 import { DictionaryNormalizer } from './dictionary.normalizer';
 import { CambridgeProvider } from './providers/cambridge.provider';
 import { OxfordProvider } from './providers/oxford.provider';
@@ -12,17 +15,17 @@ export class DictionaryService {
     private readonly normalizer: DictionaryNormalizer,
   ) {}
 
-  async lookup(word: string) {
+  async lookup(word: string, source: DictionarySource = 'cambridge') {
     let cambridge: ProviderLookupResult | undefined;
     let oxford: ProviderLookupResult | undefined;
 
-    try {
-      cambridge = await this.cambridgeProvider.lookup(word);
-    } catch {
-      cambridge = undefined;
-    }
-
-    if (this.shouldUseOxford(cambridge)) {
+    if (source === 'cambridge') {
+      try {
+        cambridge = await this.cambridgeProvider.lookup(word);
+      } catch {
+        cambridge = undefined;
+      }
+    } else {
       try {
         oxford = await this.oxfordProvider.lookup(word);
       } catch {
@@ -31,19 +34,5 @@ export class DictionaryService {
     }
 
     return this.normalizer.normalize(word, cambridge, oxford);
-  }
-
-  private shouldUseOxford(cambridge?: ProviderLookupResult) {
-    if (!cambridge) {
-      return true;
-    }
-
-    return (
-      cambridge.definitions.length === 0 ||
-      !cambridge.ipa.uk ||
-      !cambridge.ipa.us ||
-      !cambridge.audio.uk ||
-      !cambridge.audio.us
-    );
   }
 }

@@ -1,6 +1,10 @@
 export type DictionarySource = 'cambridge' | 'oxford';
 export type DictionaryAudioVariant = 'uk' | 'us';
 
+export interface DictionaryPreferences {
+  source: DictionarySource;
+}
+
 export interface DictionaryDefinition {
   text: string;
   partOfSpeech?: string;
@@ -30,7 +34,6 @@ export interface InternalDictionaryLookupResult {
   };
 }
 
-export interface PublicDictionaryLookupResult
-  extends InternalDictionaryLookupResult {
+export interface PublicDictionaryLookupResult extends InternalDictionaryLookupResult {
   cached: boolean;
 }
