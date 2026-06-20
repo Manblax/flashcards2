@@ -8,6 +8,7 @@ describe('FlashcardsService', () => {
   let prisma: {
     module: {
       findMany: jest.Mock;
+      findFirst: jest.Mock;
       create: jest.Mock;
     };
   };
@@ -21,6 +22,7 @@ describe('FlashcardsService', () => {
     prisma = {
       module: {
         findMany: jest.fn(),
+        findFirst: jest.fn(),
         create: jest.fn(),
       },
     };
@@ -81,13 +83,46 @@ describe('FlashcardsService', () => {
         userId: 'user-1',
         terms: {
           create: [
-            { term: 'hola', definition: 'hello', image: undefined },
-            { term: 'adios', definition: 'bye', image: undefined },
+            {
+              term: 'hola',
+              definition: 'hello',
+              image: undefined,
+              position: 0,
+            },
+            {
+              term: 'adios',
+              definition: 'bye',
+              image: undefined,
+              position: 1,
+            },
           ],
         },
       },
       include: {
-        terms: true,
+        terms: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
+  });
+
+  it('returns terms in their saved position order', async () => {
+    prisma.module.findFirst.mockResolvedValue({ id: 'module-1', terms: [] });
+
+    await service.findOne(user, 'module-1');
+
+    expect(prisma.module.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'module-1',
+        OR: [
+          { userId: 'user-1' },
+          { userId: null, author: 'alice' },
+        ],
+      },
+      include: {
+        terms: {
+          orderBy: { position: 'asc' },
+        },
       },
     });
   });

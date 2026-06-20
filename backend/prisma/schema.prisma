@@ -44,12 +44,15 @@ model Term {
   definition  String
   image       String?
   isFavorite  Boolean  @default(false)
+  position    Int      @default(0)
   
   moduleId    String
   module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([moduleId, position])
 }
 
 model DictionaryEntry {

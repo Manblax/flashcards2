@@ -28,15 +28,18 @@ export class FlashcardsService {
         termCount: createFlashcardDto.terms?.length || 0,
         userId: user.userId,
         terms: {
-          create: createFlashcardDto.terms?.map((term) => ({
+          create: createFlashcardDto.terms?.map((term, position) => ({
             term: term.term,
             definition: term.definition,
             image: term.image,
+            position,
           })),
         },
       },
       include: {
-        terms: true,
+        terms: {
+          orderBy: { position: 'asc' },
+        },
       },
     });
   }
@@ -54,7 +57,9 @@ export class FlashcardsService {
     const module = await this.prisma.module.findFirst({
       where: this.moduleAccessWhere(user, id),
       include: {
-        terms: true,
+        terms: {
+          orderBy: { position: 'asc' },
+        },
       },
     });
 
@@ -94,11 +99,12 @@ export class FlashcardsService {
 
         if (terms.length > 0) {
           await tx.term.createMany({
-            data: terms.map((term) => ({
+            data: terms.map((term, position) => ({
               term: term.term,
               definition: term.definition,
               image: term.image,
               moduleId: existingModule.id,
+              position,
             })),
           });
         }

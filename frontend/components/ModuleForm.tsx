@@ -1,8 +1,25 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
+import { createContext, useContext, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Module } from "@/types/module";
 import {
   createModule,
@@ -49,6 +66,14 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   const [customTermDefinitionSeparator, setCustomTermDefinitionSeparator] =
     useState("");
   const [customCardSeparator, setCustomCardSeparator] = useState("");
+  const dragSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
   
   // Инициализация карточек
   const [cards, setCards] = useState<TermCard[]>(() => {
@@ -71,6 +96,23 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       ...cards,
       { id: Date.now().toString(), term: "", definition: "" },
     ]);
+  };
+
+  const handleCardDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    setCards((currentCards) => {
+      const fromIndex = currentCards.findIndex((card) => card.id === active.id);
+      const toIndex = currentCards.findIndex((card) => card.id === over.id);
+
+      if (fromIndex === -1 || toIndex === -1) {
+        return currentCards;
+      }
+
+      return arrayMove(currentCards, fromIndex, toIndex);
+    });
   };
 
   const parsedImportCards = useMemo(
@@ -385,19 +427,24 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       ) : null}
 
       {/* Список карточек */}
-      <div className="space-y-6">
-        {cards.map((card, index) => (
-          <div key={card.id} className="card rounded-[22px] border border-transparent bg-[var(--app-panel-strong)]">
+      <DndContext
+        sensors={dragSensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleCardDragEnd}
+      >
+        <SortableContext
+          items={cards.map((card) => card.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-6">
+            {cards.map((card, index) => (
+              <SortableCard key={card.id} id={card.id}>
             <div className="card-body p-6 sm:p-7">
               {/* Хедер карточки */}
               <div className="flex justify-between items-center mb-4 border-b border-neutral/10 pb-4">
                 <span className="text-neutral-content font-medium">{index + 1}</span>
                 <div className="flex items-center gap-2">
-                  <button className="btn btn-ghost btn-xs btn-circle text-neutral-content cursor-move">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </button>
+                  <CardDragHandle index={index} />
                   <button 
                     className="btn btn-ghost btn-xs btn-circle text-neutral-content hover:text-error"
                     onClick={() => removeCard(card.id)}
@@ -534,9 +581,11 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
               </div>
 
             </div>
+              </SortableCard>
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Кнопка добавления карточки */}
       <div className="flex justify-center mt-12 mb-20">
@@ -574,6 +623,83 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
         />
       ) : null}
     </div>
+  );
+}
+
+const SortableCardContext = createContext<ReturnType<typeof useSortable> | null>(
+  null,
+);
+
+function SortableCard({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
+  const sortable = useSortable({ id });
+  const {
+    isDragging,
+    setNodeRef,
+    transform,
+    transition,
+  } = sortable;
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    position: "relative",
+    zIndex: isDragging ? 40 : undefined,
+  };
+
+  return (
+    <SortableCardContext.Provider value={sortable}>
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`card rounded-[22px] border bg-[var(--app-panel-strong)] ${
+          isDragging
+            ? "scale-[1.01] border-[var(--app-focus)] shadow-2xl"
+            : "border-transparent"
+        }`}
+      >
+        {children}
+      </div>
+    </SortableCardContext.Provider>
+  );
+}
+
+function CardDragHandle({ index }: { index: number }) {
+  const sortable = useContext(SortableCardContext);
+
+  if (!sortable) {
+    return null;
+  }
+
+  return (
+    <button
+      ref={sortable.setActivatorNodeRef}
+      type="button"
+      className="btn btn-ghost btn-xs btn-circle cursor-grab touch-none text-neutral-content active:cursor-grabbing"
+      {...sortable.attributes}
+      {...sortable.listeners}
+      title="Перетащить карточку"
+      aria-label={`Переместить карточку ${index + 1}`}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      </svg>
+    </button>
   );
 }
 
