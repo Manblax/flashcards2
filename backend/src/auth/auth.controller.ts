@@ -7,30 +7,41 @@ import {
   Res,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { Response } from 'express';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a user' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 409, description: 'Email or username already exists' })
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Log in and receive a JWT access token' })
+  @ApiResponse({ status: 201, description: 'Authentication succeeded' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
   @Get('google')
+  @ApiOperation({ summary: 'Start Google OAuth authentication' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google' })
   googleAuth(@Res() res: Response) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const redirectUri =
-      process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/auth/google/callback';
+      process.env.GOOGLE_CALLBACK_URL ||
+      'http://localhost:3001/auth/google/callback';
 
     if (!clientId) {
       throw new InternalServerErrorException(
@@ -49,6 +60,8 @@ export class AuthController {
   }
 
   @Get('google/callback')
+  @ApiOperation({ summary: 'Complete Google OAuth authentication' })
+  @ApiResponse({ status: 302, description: 'Redirects to the frontend' })
   async googleCallback(@Query('code') code: string, @Res() res: Response) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const successRedirect = new URL('/auth/callback', frontendUrl);

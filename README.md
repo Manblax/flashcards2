@@ -73,6 +73,9 @@ npm run start:dev
 
 Backend запускается на `http://localhost:3001`.
 
+Интерактивная Swagger-документация доступна на `http://localhost:3001/api/docs`,
+OpenAPI JSON — на `http://localhost:3001/api/docs-json`.
+
 Для Google OAuth нужно заполнить переменные в `backend/.env`:
 
 - `GOOGLE_CLIENT_ID`

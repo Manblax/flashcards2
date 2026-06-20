@@ -10,16 +10,30 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiProduces,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { DictionaryService } from './dictionary.service';
 import { validateLookupWord } from './dictionary.utils';
 
+@ApiTags('Dictionary')
 @Controller('dictionary')
 export class DictionaryController {
   constructor(private readonly dictionaryService: DictionaryService) {}
 
   @Get('lookup')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Look up definitions, pronunciation, and audio for a word',
+  })
+  @ApiResponse({ status: 400, description: 'Invalid word' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async lookup(@Query('word') word?: string) {
     const normalizedWord = validateLookupWord(word);
 
@@ -31,6 +45,11 @@ export class DictionaryController {
   }
 
   @Get('audio/:id')
+  @ApiOperation({ summary: 'Stream cached dictionary pronunciation audio' })
+  @ApiProduces('audio/mpeg')
+  @ApiResponse({ status: 200, description: 'Audio stream' })
+  @ApiResponse({ status: 404, description: 'Audio not found' })
+  @ApiResponse({ status: 502, description: 'Upstream audio source failed' })
   async audio(@Param('id') id: string, @Res() res: Response) {
     const audio = await this.dictionaryService.findAudio(id);
 
