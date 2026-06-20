@@ -358,10 +358,10 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     "textarea w-full min-h-[100px] rounded-2xl border border-transparent bg-[var(--app-field)] px-5 py-4 text-base text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const termInputClassName =
-    "input h-14 min-h-14 w-full rounded-xl border border-transparent bg-[var(--app-field-deep)] px-5 text-lg font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-deep-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
+    "input h-11 min-h-11 w-full rounded-lg border border-transparent bg-[var(--app-field-deep)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-deep-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const definitionInputClassName =
-    "input h-16 min-h-16 w-full rounded-2xl border-2 border-[var(--app-focus)] bg-[var(--app-field-active)] px-6 text-xl font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[var(--app-field-active)] focus:border-[var(--app-focus)] focus:shadow-none focus:outline-none";
+    "input h-11 min-h-11 w-full rounded-lg border-2 border-[var(--app-focus)] bg-[var(--app-field-active)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[var(--app-field-active)] focus:border-[var(--app-focus)] focus:shadow-none focus:outline-none";
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -413,18 +413,16 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       </div>
 
       {/* Инструменты списка */}
-      {mode === "edit" ? (
-        <div className="flex justify-start mb-10">
-          <button
-            type="button"
-            className="btn rounded-full border-none bg-[var(--app-panel-strong)] px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel-strong-hover)]"
-            onClick={openImport}
-          >
-            <span className="text-2xl leading-none">+</span>
-            Импортировать
-          </button>
-        </div>
-      ) : null}
+      <div className="mb-10 flex justify-start">
+        <button
+          type="button"
+          className="btn rounded-full border-none bg-[var(--app-panel-strong)] px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel-strong-hover)]"
+          onClick={openImport}
+        >
+          <span className="text-2xl leading-none">+</span>
+          Импортировать
+        </button>
+      </div>
 
       {/* Список карточек */}
       <DndContext
@@ -436,12 +434,12 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
           items={cards.map((card) => card.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-6">
+          <div className="space-y-4">
             {cards.map((card, index) => (
               <SortableCard key={card.id} id={card.id}>
-            <div className="card-body p-6 sm:p-7">
+            <div className="card-body p-4 sm:p-5">
               {/* Хедер карточки */}
-              <div className="flex justify-between items-center mb-4 border-b border-neutral/10 pb-4">
+              <div className="mb-3 flex items-center justify-between border-b border-neutral/10 pb-3">
                 <span className="text-neutral-content font-medium">{index + 1}</span>
                 <div className="flex items-center gap-2">
                   <CardDragHandle index={index} />
@@ -457,7 +455,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
               </div>
 
               {/* Поля ввода */}
-              <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex flex-col gap-4 lg:flex-row">
                 {/* Термин */}
                 <div className="flex-1 form-control w-full">
                   <input
@@ -472,7 +470,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                       }
                     }}
                   />
-                  <label className="label px-0 pt-2">
+                  <label className="label px-0 pt-1.5">
                     <span className="label-text-alt text-neutral-content uppercase tracking-wider text-xs font-semibold">Термин</span>
                   </label>
                 </div>
@@ -503,7 +501,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                       <span className="loading loading-spinner loading-xs absolute right-4 top-1/2 -translate-y-1/2 text-[var(--app-focus)]"></span>
                     ) : null}
                   </div>
-                  <label className="label px-0 pt-2">
+                  <label className="label px-0 pt-1.5">
                     <span className="label-text-alt text-neutral-content uppercase tracking-wider text-xs font-semibold">
                       Определение
                       {activeLookupCardId === card.id && lookupOptions[card.id]?.length
@@ -524,23 +522,23 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                   (lookupCardId === card.id ||
                     lookupErrors[card.id] ||
                     lookupOptions[card.id]?.length) ? (
-                    <div className="z-30 mt-8 w-full rounded-none bg-transparent p-0">
+                    <div className="z-30 mt-2 w-full rounded-none bg-transparent p-0">
                       {lookupCardId === card.id ? (
-                        <div className="flex min-h-14 items-center gap-2 rounded-xl border border-[var(--app-border)] px-5 py-4 text-base font-normal text-[var(--app-text-strong)]">
+                        <div className="flex min-h-10 items-center gap-2 rounded-lg border border-[var(--app-suggestion-border)] bg-[var(--app-suggestion-bg)] px-4 py-2.5 text-sm font-normal text-[var(--app-text-strong)]">
                           <span className="loading loading-spinner loading-xs"></span>
                           Поиск определений...
                         </div>
                       ) : lookupErrors[card.id] ? (
-                        <div className="rounded-xl border border-error/70 px-5 py-4 text-base font-normal text-error">
+                        <div className="rounded-lg border border-error/70 px-4 py-2.5 text-sm font-normal text-error">
                           {lookupErrors[card.id]}
                         </div>
                       ) : (
-                        <div className="space-y-3">
+                        <div className="space-y-2">
                           {lookupOptions[card.id].map((definition, definitionIndex) => (
                             <button
                               type="button"
                               key={`${definition.text}-${definitionIndex}`}
-                              className="block min-h-14 w-full rounded-xl border border-[var(--app-border)] px-5 py-4 text-left text-base font-normal leading-relaxed text-[var(--app-text-strong)] transition-colors hover:bg-[var(--app-field-active)] focus:bg-[var(--app-field-active)] focus:outline-none"
+                              className="block min-h-10 w-full rounded-lg border border-[var(--app-suggestion-border)] bg-[var(--app-suggestion-bg)] px-4 py-2.5 text-left text-sm font-normal leading-snug text-[var(--app-text-strong)] transition-[background-color,border-color] hover:border-[var(--app-focus)] hover:bg-[var(--app-suggestion-hover)] focus:border-[var(--app-focus)] focus:bg-[var(--app-suggestion-hover)] focus:outline-none"
                               onMouseDown={(event) => event.preventDefault()}
                               onClick={() => applyDefinition(card.id, definition.text)}
                             >
@@ -556,7 +554,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 {/* Загрузка изображения */}
                 <div className="flex-none pt-1">
                    <button 
-                     className="w-24 h-20 border-2 border-dashed border-neutral/30 hover:border-neutral/60 rounded-lg flex flex-col items-center justify-center gap-1 text-neutral-content hover:text-[var(--app-text-strong)] transition-colors overflow-hidden relative"
+                     className="relative flex h-16 w-20 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg border-2 border-dashed border-neutral/30 text-neutral-content transition-colors hover:border-neutral/60 hover:text-[var(--app-text-strong)]"
                      onClick={() => handleImageClick(card.id)}
                    >
                       {card.image ? (

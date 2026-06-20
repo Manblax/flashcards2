@@ -65,6 +65,9 @@
   --app-field-deep-hover: #0d0d2a;
   --app-field-active: #171925;
   --app-field-placeholder: #98a2ca;
+  --app-suggestion-bg: #303956;
+  --app-suggestion-border: #b7bdcf;
+  --app-suggestion-hover: #3a4465;
   --app-dropdown-bg: #151a36;
   --app-dropdown-hover: #1d2447;
   --app-divider: #252c52;
@@ -131,6 +134,9 @@
   --app-field-deep-hover: #eef1f7;
   --app-field-active: #ffffff;
   --app-field-placeholder: #939bb4;
+  --app-suggestion-bg: #ffffff;
+  --app-suggestion-border: #aeb7cc;
+  --app-suggestion-hover: #f6f7fb;
   --app-dropdown-bg: #ffffff;
   --app-dropdown-hover: #f6f7fb;
   --app-divider: #e7eaf2;
@@ -160,6 +166,9 @@ body {
   --app-field-deep-hover: var(--color-base-300);
   --app-field-active: var(--color-base-100);
   --app-field-placeholder: #9ca3af;
+  --app-suggestion-bg: var(--color-base-100);
+  --app-suggestion-border: #9ca3af;
+  --app-suggestion-hover: var(--color-base-200);
   --app-dropdown-bg: var(--color-base-100);
   --app-dropdown-hover: var(--color-base-200);
   --app-divider: #e5e7eb;
@@ -184,6 +193,9 @@ body {
   --app-field-deep-hover: #2b3440;
   --app-field-active: var(--color-base-300);
   --app-field-placeholder: #9ca3af;
+  --app-suggestion-bg: var(--color-base-300);
+  --app-suggestion-border: #9ca3af;
+  --app-suggestion-hover: #2b3440;
   --app-dropdown-bg: var(--color-base-200);
   --app-dropdown-hover: var(--color-base-300);
   --app-divider: #374151;
