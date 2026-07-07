@@ -2,10 +2,17 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DICTIONARY_SOURCE_SETTING_KEY } from "./dictionary-settings";
 import {
+  createModule,
+  deleteModule,
   getGoogleAuthUrl,
+  getModule,
   getModules,
   getPublicApiUrl,
+  login,
   lookupDictionary,
+  register,
+  updateModule,
+  uploadFile,
 } from "./api";
 
 describe("api utilities", () => {
@@ -52,6 +59,99 @@ describe("api utilities", () => {
     await expect(getModules()).resolves.toEqual([]);
   });
 
+  it("returns null for a module request without auth", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getModule("module-1")).resolves.toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("returns null when a module cannot be fetched", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
+    );
+
+    await expect(getModule("missing", { token: "token-1" })).resolves.toBeNull();
+  });
+
+  it("creates, updates, and deletes modules with explicit auth tokens", async () => {
+    const moduleResponse = {
+      id: "module-1",
+      title: "Phrasal verbs",
+      termCount: 2,
+      author: "demo",
+      createdAt: "2026-07-08T00:00:00.000Z",
+      updatedAt: "2026-07-08T00:00:00.000Z",
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify(moduleResponse), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ...moduleResponse, title: "Updated" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      createModule({ title: "Phrasal verbs" }, { token: "token-1" }),
+    ).resolves.toEqual(moduleResponse);
+    await expect(
+      updateModule("module-1", { title: "Updated" }, { token: "token-1" }),
+    ).resolves.toMatchObject({ title: "Updated" });
+    await expect(
+      deleteModule("module-1", { token: "token-1" }),
+    ).resolves.toEqual({ ok: true });
+
+    expect(fetchMock.mock.calls[0][0]).toBe("http://localhost:3001/flashcards");
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({
+      method: "POST",
+      body: JSON.stringify({ title: "Phrasal verbs" }),
+    });
+    expect(fetchMock.mock.calls[0][1].headers.get("Authorization")).toBe(
+      "Bearer token-1",
+    );
+    expect(fetchMock.mock.calls[1][0]).toBe(
+      "http://localhost:3001/flashcards/module-1",
+    );
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({
+      method: "PATCH",
+      body: JSON.stringify({ title: "Updated" }),
+    });
+    expect(fetchMock.mock.calls[2][1]).toMatchObject({ method: "DELETE" });
+  });
+
+  it("throws when write operations fail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(null, { status: 500 })),
+    );
+
+    await expect(createModule({ title: "Broken" })).rejects.toThrow(
+      "Failed to create module",
+    );
+    await expect(updateModule("module-1", {})).rejects.toThrow(
+      "Failed to update module",
+    );
+    await expect(deleteModule("module-1")).rejects.toThrow(
+      "Failed to delete module",
+    );
+  });
+
   it("looks up dictionary entries with the stored source preference", async () => {
     localStorage.setItem("token", "stored-token");
     localStorage.setItem(DICTIONARY_SOURCE_SETTING_KEY, "oxford");
@@ -80,5 +180,51 @@ describe("api utilities", () => {
       "http://localhost:3001/dictionary/lookup?word=run&source=oxford",
     );
     expect(init.headers.get("Authorization")).toBe("Bearer stored-token");
+  });
+
+  it("uploads a file as form data", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ url: "/uploads/image.png" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const file = new File(["image"], "image.png", { type: "image/png" });
+
+    await expect(uploadFile(file, { token: "token-1" })).resolves.toEqual({
+      url: "/uploads/image.png",
+    });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://localhost:3001/upload");
+    expect(init.method).toBe("POST");
+    expect(init.body).toBeInstanceOf(FormData);
+    expect(init.headers.get("Authorization")).toBe("Bearer token-1");
+  });
+
+  it("uses backend error messages for auth failures", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "Email already exists" }), {
+          status: 409,
+          headers: { "Content-Type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ message: "Invalid credentials" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(register({ email: "demo@example.com" })).rejects.toThrow(
+      "Email already exists",
+    );
+    await expect(login({ username: "demo" })).rejects.toThrow(
+      "Invalid credentials",
+    );
   });
 });
