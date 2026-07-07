@@ -1,0 +1,11 @@
+{
+  "name": "flashcards2-workspace",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:backend && npm run test:dictionary && npm run test:frontend",
+    "test:backend": "npm --prefix backend test -- --runInBand",
+    "test:dictionary": "npm --prefix dictionary-service test -- --runInBand",
+    "test:frontend": "npm --prefix frontend test",
+    "test:e2e": "npm --prefix frontend run test:e2e"
+  }
+}

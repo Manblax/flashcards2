@@ -103,6 +103,8 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run test
+npm run test:e2e
 ```
 
 ### Backend (`backend/`)
@@ -113,6 +115,18 @@ npm run start:dev
 npm run build
 npm run start:prod
 npm run test
+npm run test:e2e
+```
+
+### Все unit tests
+
+```bash
+npm test
+```
+
+### E2E tests
+
+```bash
 npm run test:e2e
 ```
 
