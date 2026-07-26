@@ -1,5 +1,6 @@
 import type { Module } from "@/types/module";
 import { getDictionarySourcePreference } from "@/lib/dictionary-settings";
+import { isAuthTokenActive } from "@/lib/auth-token";
 
 const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const INTERNAL_API_URL = process.env.INTERNAL_API_URL || PUBLIC_API_URL;
@@ -61,7 +62,9 @@ function getClientToken() {
     return null;
   }
 
-  return localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+
+  return token && isAuthTokenActive(token) ? token : null;
 }
 
 function withAuthHeaders(headers?: HeadersInit, token?: string | null) {
@@ -84,6 +87,24 @@ async function apiFetch(path: string, init: RequestInit = {}, token?: string | n
 
 export function getGoogleAuthUrl() {
   return getPublicApiUrl("/auth/google");
+}
+
+export async function validateAuthToken(token: string) {
+  try {
+    const response = await apiFetch(
+      "/auth/session",
+      { cache: "no-store" },
+      token,
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return false;
+    }
+
+    return response.ok ? true : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getModules(

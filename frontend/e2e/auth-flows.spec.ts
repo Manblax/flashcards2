@@ -1,10 +1,14 @@
 import { expect, test } from "@playwright/test";
+import { createTestAuthToken } from "../test/auth-token";
 
 const authUser = {
   id: "user-1",
   username: "demo",
   email: "demo@example.com",
 };
+const loginToken = createTestAuthToken();
+const registerToken = createTestAuthToken();
+const googleToken = createTestAuthToken();
 
 test.describe("auth flows", () => {
   test("logs in with mocked backend response and persists the session", async ({
@@ -21,7 +25,7 @@ test.describe("auth flows", () => {
         contentType: "application/json",
         headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({
-          access_token: "login-token",
+          access_token: loginToken,
           user: authUser,
         }),
       });
@@ -38,7 +42,7 @@ test.describe("auth flows", () => {
     await expect(page.getByRole("heading", { name: "Недавние" })).toBeVisible();
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("token")))
-      .toBe("login-token");
+      .toBe(loginToken);
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("user")))
       .toContain('"username":"demo"');
@@ -84,7 +88,7 @@ test.describe("auth flows", () => {
         contentType: "application/json",
         headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({
-          access_token: "register-token",
+          access_token: registerToken,
           user: authUser,
         }),
       });
@@ -100,7 +104,7 @@ test.describe("auth flows", () => {
     await expect(page.getByRole("heading", { name: "Недавние" })).toBeVisible();
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("token")))
-      .toBe("register-token");
+      .toBe(registerToken);
   });
 
   test("shows duplicate-user registration errors", async ({ page }) => {
@@ -132,13 +136,13 @@ test.describe("auth flows", () => {
     page,
   }) => {
     await page.goto(
-      "/auth/callback?access_token=google-token&id=user-1&username=demo&email=demo%40example.com",
+      `/auth/callback?access_token=${encodeURIComponent(googleToken)}&id=user-1&username=demo&email=demo%40example.com`,
     );
 
     await expect(page).toHaveURL("/");
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("token")))
-      .toBe("google-token");
+      .toBe(googleToken);
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("user")))
       .toContain('"email":"demo@example.com"');
@@ -153,5 +157,41 @@ test.describe("auth flows", () => {
     await expect(
       page.getByText("Не удалось войти через Google. Попробуйте еще раз."),
     ).toBeVisible();
+  });
+
+  test("clears an expired stored session instead of showing authenticated UI", async ({
+    context,
+    page,
+  }) => {
+    const expiredToken = createTestAuthToken(Date.now() - 60_000);
+
+    await context.addCookies([
+      {
+        name: "token",
+        value: expiredToken,
+        domain: "127.0.0.1",
+        path: "/",
+        expires: Math.floor(Date.now() / 1000) + 60 * 60,
+      },
+    ]);
+    await page.addInitScript(
+      ({ token, user }) => {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+      },
+      { token: expiredToken, user: authUser },
+    );
+
+    await page.goto("/");
+
+    await expect(
+      page.getByRole("heading", { name: "Учите слова по своим модулям" }),
+    ).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem("token")))
+      .toBeNull();
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem("user")))
+      .toBeNull();
   });
 });

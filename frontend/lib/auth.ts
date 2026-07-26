@@ -1,7 +1,11 @@
 "use client";
 
+import {
+  getAuthTokenExpiration,
+  isAuthTokenActive,
+} from "@/lib/auth-token";
+
 const TOKEN_COOKIE_NAME = "token";
-const TOKEN_MAX_AGE_SECONDS = 60 * 60;
 export const AUTH_STATE_CHANGE_EVENT = "auth-state-change";
 
 export interface AuthUser {
@@ -24,7 +28,18 @@ function getCookieValue(name: string) {
 }
 
 function setTokenCookie(token: string) {
-  document.cookie = `${TOKEN_COOKIE_NAME}=${encodeURIComponent(token)}; path=/; max-age=${TOKEN_MAX_AGE_SECONDS}; samesite=lax`;
+  const expiration = getAuthTokenExpiration(token);
+
+  if (expiration === null) {
+    clearTokenCookie();
+    return;
+  }
+
+  const maxAge = Math.max(
+    0,
+    Math.floor((expiration - Date.now()) / 1000),
+  );
+  document.cookie = `${TOKEN_COOKIE_NAME}=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; samesite=lax`;
 }
 
 function clearTokenCookie() {
@@ -39,23 +54,59 @@ function emitAuthStateChange(user: AuthUser | null) {
   );
 }
 
-export function getStoredUser(): AuthUser | null {
-  const storedUser = localStorage.getItem("user");
+function removeStoredSession() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  clearTokenCookie();
+}
 
+function parseStoredUser(storedUser: string | null): AuthUser | null {
   if (!storedUser) {
     return null;
   }
 
   try {
-    return JSON.parse(storedUser) as AuthUser;
+    const user = JSON.parse(storedUser) as Partial<AuthUser>;
+
+    if (
+      typeof user.id !== "string" ||
+      typeof user.username !== "string" ||
+      typeof user.email !== "string"
+    ) {
+      return null;
+    }
+
+    return user as AuthUser;
   } catch (error) {
     console.error("Failed to parse stored user", error);
-    localStorage.removeItem("user");
     return null;
   }
 }
 
+export function getStoredAuthToken() {
+  const storedToken = localStorage.getItem("token");
+
+  return storedToken && isAuthTokenActive(storedToken) ? storedToken : null;
+}
+
+export function getStoredUser(): AuthUser | null {
+  const storedToken = getStoredAuthToken();
+  const storedUser = parseStoredUser(localStorage.getItem("user"));
+
+  if (!storedToken || !storedUser) {
+    removeStoredSession();
+    return null;
+  }
+
+  return storedUser;
+}
+
 export function persistAuthSession(token: string, user: AuthUser) {
+  if (!isAuthTokenActive(token)) {
+    clearAuthSession();
+    return;
+  }
+
   localStorage.setItem("token", token);
   localStorage.setItem("user", JSON.stringify(user));
   setTokenCookie(token);
@@ -63,22 +114,30 @@ export function persistAuthSession(token: string, user: AuthUser) {
 }
 
 export function clearAuthSession() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  clearTokenCookie();
+  removeStoredSession();
   emitAuthStateChange(null);
 }
 
 export function syncAuthCookieFromStorage() {
   const storedToken = localStorage.getItem("token");
+  const storedUserValue = localStorage.getItem("user");
+  const storedUser = parseStoredUser(storedUserValue);
   const cookieToken = getCookieValue(TOKEN_COOKIE_NAME);
 
-  if (!storedToken && cookieToken) {
-    clearTokenCookie();
-    return true;
+  if (!storedToken || !isAuthTokenActive(storedToken) || !storedUser) {
+    const sessionChanged = Boolean(
+      storedToken || storedUserValue || cookieToken,
+    );
+
+    if (sessionChanged) {
+      removeStoredSession();
+      emitAuthStateChange(null);
+    }
+
+    return sessionChanged;
   }
 
-  if (storedToken && cookieToken !== storedToken) {
+  if (cookieToken !== storedToken) {
     setTokenCookie(storedToken);
     return true;
   }
