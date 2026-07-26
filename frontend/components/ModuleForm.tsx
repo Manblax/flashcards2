@@ -352,13 +352,13 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   };
 
   const moduleInputClassName =
-    "input w-full rounded-2xl border border-transparent bg-[var(--app-field)] px-5 text-lg font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
+    "input w-full rounded-2xl border border-[var(--app-field-border,transparent)] bg-[var(--app-field)] px-5 text-lg font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const moduleTextareaClassName =
-    "textarea w-full min-h-[100px] rounded-2xl border border-transparent bg-[var(--app-field)] px-5 py-4 text-base text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
+    "textarea w-full min-h-[100px] rounded-2xl border border-[var(--app-field-border,transparent)] bg-[var(--app-field)] px-5 py-4 text-base text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const termInputClassName =
-    "input h-11 min-h-11 w-full rounded-lg border border-transparent bg-[var(--app-field-deep)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-deep-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
+    "input h-11 min-h-11 w-full rounded-lg border border-[var(--app-field-border,transparent)] bg-[var(--app-field-deep)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 hover:bg-[var(--app-field-deep-hover)] focus:bg-[var(--app-field-focus)] focus:border-[var(--app-focus)] focus:shadow-[0_0_0_1px_var(--app-focus-shadow)] focus:outline-none";
 
   const definitionInputClassName =
     "input h-11 min-h-11 w-full rounded-lg border-2 border-[var(--app-focus)] bg-[var(--app-field-active)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[var(--app-field-active)] focus:border-[var(--app-focus)] focus:shadow-none focus:outline-none";
