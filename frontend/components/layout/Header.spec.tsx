@@ -48,6 +48,7 @@ describe("Header", () => {
 
     render(<Header isAuthenticated />);
 
+    expect(screen.getByLabelText("Открыть меню")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Поиск")).toBeInTheDocument();
     expect(screen.getByTitle("Создать модуль")).toHaveAttribute(
       "href",

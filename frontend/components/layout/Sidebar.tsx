@@ -6,15 +6,25 @@ import { usePathname } from "next/navigation";
 const Sidebar = () => {
   const pathname = usePathname();
 
+  const closeMobileMenu = () => {
+    const sidebarToggle = document.getElementById(
+      "app-sidebar",
+    ) as HTMLInputElement | null;
+
+    if (sidebarToggle) {
+      sidebarToggle.checked = false;
+    }
+  };
+
   const menuItems = [
     { href: "/", label: "Главная", icon: "🏠" },
     { href: "/library", label: "Ваша библиотека", icon: "📚" },
   ];
 
   return (
-    <aside className="w-64 bg-base-200 min-h-screen border-r border-neutral/30 flex flex-col">
+    <aside className="flex min-h-full w-[min(20rem,86vw)] flex-col border-r border-neutral/30 bg-base-200 lg:min-h-screen lg:w-64">
       {/* Логотип */}
-      <div className="p-6 flex items-center gap-3">
+      <div className="flex items-center gap-3 px-5 py-5 sm:p-6">
         <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
           <svg
             viewBox="0 0 24 24"
@@ -30,7 +40,7 @@ const Sidebar = () => {
       </div>
 
       {/* Меню */}
-      <nav className="flex-1 px-3">
+      <nav className="flex-1 px-3 pb-6">
         <ul className="menu space-y-1">
           {menuItems.map((item) => (
             <li key={item.href}>
@@ -41,6 +51,7 @@ const Sidebar = () => {
                     ? "bg-neutral/50 text-[var(--app-text-strong)]"
                     : "text-neutral-content hover:bg-neutral/30"
                 }`}
+                onClick={closeMobileMenu}
               >
                 <span className="text-xl">{item.icon}</span>
                 <span className="font-medium">{item.label}</span>

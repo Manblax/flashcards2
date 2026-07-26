@@ -19,9 +19,9 @@ export default async function LibraryPage() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Табы */}
-      <div className="tabs mb-8">
+      <div className="tabs mb-6 sm:mb-8">
         <button
           className="tab tab-lg pb-4 text-base font-semibold tab-active border-b-2 border-primary text-[var(--app-text-strong)]"
         >

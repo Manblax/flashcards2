@@ -21,9 +21,9 @@ export default async function Home() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       <section>
-        <h2 className="text-2xl font-bold mb-6 text-[var(--app-text-strong)]">Недавние</h2>
+        <h2 className="mb-5 text-xl font-bold text-[var(--app-text-strong)] sm:mb-6 sm:text-2xl">Недавние</h2>
         {recentModules.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {recentModules.map((module) => (
@@ -42,7 +42,7 @@ export default async function Home() {
 
 function GuestHome() {
   return (
-    <div className="min-h-[calc(100vh-73px)] px-6 py-12 sm:py-16">
+    <div className="min-h-[calc(100vh-65px)] px-4 py-10 sm:px-6 sm:py-16">
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(22rem,1fr)]">
         <section className="max-w-xl">
           <div className="mb-7 flex items-center gap-3">
@@ -61,14 +61,14 @@ function GuestHome() {
             <span className="text-2xl font-bold text-[var(--app-text-strong)]">Q</span>
           </div>
 
-          <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-normal text-[var(--app-text-strong)] sm:text-5xl">
+          <h1 className="max-w-2xl text-3xl font-bold leading-tight tracking-normal text-[var(--app-text-strong)] sm:text-5xl">
             Учите слова по своим модулям
           </h1>
           <p className="mt-5 max-w-lg text-lg leading-8 text-neutral-content">
             Собирайте термины, слушайте произношение и возвращайтесь к повторению без лишней навигации.
           </p>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row">
             <Link href="/register" className="btn btn-primary min-h-12 rounded-xl px-7 text-base font-bold text-primary-content">
               Зарегистрироваться
             </Link>

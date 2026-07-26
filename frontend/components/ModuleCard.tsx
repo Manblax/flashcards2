@@ -9,16 +9,16 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
   return (
     <Link href={`/module/${module.id}`}>
       <div className="card bg-base-300/50 hover:bg-base-300 transition-all cursor-pointer border border-neutral/10 hover:border-primary/30 rounded-2xl overflow-hidden">
-        <div className="card-body p-6 flex flex-row items-center gap-4">
+        <div className="card-body flex flex-row items-center gap-3 p-4 sm:gap-4 sm:p-6">
           {/* Иконка модуля */}
           <div className="flex-shrink-0">
-            <div className="w-14 h-14 bg-primary/20 rounded-xl flex items-center justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20 sm:h-14 sm:w-14">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="w-7 h-7 text-primary"
+                className="h-6 w-6 text-primary sm:h-7 sm:w-7"
               >
                 <path d="M9 3v18m6-18v18M3 9h18M3 15h18" />
               </svg>
@@ -28,12 +28,12 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
           {/* Контент */}
           <div className="flex-1 min-w-0">
             {/* Заголовок */}
-            <h3 className="text-lg font-bold mb-1 text-[var(--app-text-strong)]">
+            <h3 className="mb-1 break-words text-base font-bold text-[var(--app-text-strong)] sm:text-lg">
               {module.title}
             </h3>
 
             {/* Метаинформация */}
-            <div className="text-sm text-neutral-content flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-content sm:text-sm">
               <span>
                 {module.termCount} {getTermWord(module.termCount)}
               </span>

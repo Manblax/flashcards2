@@ -10,7 +10,7 @@ export default async function CreatePage() {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8">
+    <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-8">
       <ModuleForm mode="create" />
     </div>
   );

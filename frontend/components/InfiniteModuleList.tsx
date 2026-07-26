@@ -117,8 +117,8 @@ const InfiniteModuleList = ({ initialModules = [] }: InfiniteModuleListProps) =>
   return (
     <div>
       {groupedModules.map((group, index) => (
-        <div key={index} className="mb-12">
-          <h2 className="text-sm font-bold text-neutral-content mb-4 tracking-wider">
+        <div key={index} className="mb-9 sm:mb-12">
+          <h2 className="mb-4 break-words text-xs font-bold tracking-wider text-neutral-content sm:text-sm">
             {group.title}
           </h2>
           <div className="flex flex-col gap-3">

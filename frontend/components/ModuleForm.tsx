@@ -364,19 +364,19 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     "input h-11 min-h-11 w-full rounded-lg border-2 border-[var(--app-focus)] bg-[var(--app-field-active)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[var(--app-field-active)] focus:border-[var(--app-focus)] focus:shadow-none focus:outline-none";
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="mx-auto max-w-5xl">
       {/* Хедер формы с действиями */}
-      <div className="flex items-center justify-between mb-8 sticky top-[64px] z-10 bg-base-100/95 backdrop-blur py-4">
+      <div className="sticky top-[101px] z-10 mb-6 flex items-center justify-between gap-3 bg-base-100/95 py-3 backdrop-blur sm:mb-8 sm:py-4 md:top-[65px]">
         {mode === "edit" ? (
-           <Link href={`/module/${initialData?.id}`} className="btn btn-primary btn-sm px-6 rounded-full font-semibold">
+           <Link href={`/module/${initialData?.id}`} className="btn btn-primary btn-sm min-w-0 rounded-full px-4 font-semibold sm:px-6">
              Назад к модулю
            </Link>
         ) : (
-           <h1 className="text-2xl font-bold text-[var(--app-text-strong)]">Создать новый модуль</h1>
+           <h1 className="min-w-0 text-lg font-bold leading-tight text-[var(--app-text-strong)] sm:text-2xl">Создать новый модуль</h1>
         )}
         
         <button 
-          className="btn btn-primary btn-sm px-8 rounded-full font-semibold"
+          className="btn btn-primary btn-sm shrink-0 rounded-full px-5 font-semibold sm:px-8"
           onClick={handleSave}
           disabled={isSaving}
         >
@@ -389,7 +389,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       </div>
 
       {/* Форма описания модуля */}
-      <div className="space-y-4 mb-12">
+      <div className="mb-8 space-y-4 sm:mb-12">
         <div className="form-control">
           <label className="label pl-0 pb-1" hidden={mode === "create"}>
              <span className="label-text text-neutral-content text-xs font-semibold uppercase">Название</span>
@@ -413,10 +413,10 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       </div>
 
       {/* Инструменты списка */}
-      <div className="mb-10 flex justify-start">
+      <div className="mb-8 flex justify-start sm:mb-10">
         <button
           type="button"
-          className="btn rounded-full border-none bg-[var(--app-panel-strong)] px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel-strong-hover)]"
+          className="btn w-full rounded-full border-none bg-[var(--app-panel-strong)] px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel-strong-hover)] sm:w-auto"
           onClick={openImport}
         >
           <span className="text-2xl leading-none">+</span>
@@ -455,9 +455,9 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
               </div>
 
               {/* Поля ввода */}
-              <div className="flex flex-col gap-4 lg:flex-row">
+              <div className="grid grid-cols-[minmax(0,1fr)_5rem] gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem]">
                 {/* Термин */}
-                <div className="flex-1 form-control w-full">
+                <div className="form-control col-span-2 w-full lg:col-span-1">
                   <input
                     type="text"
                     className={termInputClassName}
@@ -476,7 +476,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 </div>
 
                 {/* Определение */}
-                <div className="flex-1 form-control w-full relative">
+                <div className="form-control relative w-full">
                   <div className="relative">
                     <input
                       type="text"
@@ -586,9 +586,9 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
       </DndContext>
 
       {/* Кнопка добавления карточки */}
-      <div className="flex justify-center mt-12 mb-20">
+      <div className="mb-16 mt-8 flex justify-center sm:mb-20 sm:mt-12">
         <button 
-          className="btn btn-lg bg-base-300 hover:bg-base-200 text-[var(--app-text-strong)] border-neutral/20 min-w-[200px]"
+          className="btn btn-lg w-full min-w-0 border-neutral/20 bg-base-300 text-[var(--app-text-strong)] hover:bg-base-200 sm:w-auto sm:min-w-[200px]"
           onClick={addCard}
         >
           <span className="font-semibold text-lg">+ Добавить карточку</span>
@@ -754,8 +754,8 @@ function ImportModal({
         </svg>
       </button>
 
-      <div className="flex-1 overflow-y-auto px-8 pb-28 pt-12">
-        <div className="mb-6 text-base text-[var(--app-text-strong)]">
+      <div className="flex-1 overflow-y-auto px-4 pb-44 pt-16 sm:px-8 sm:pb-28 sm:pt-12">
+        <div className="mb-6 pr-10 text-base text-[var(--app-text-strong)] sm:pr-0">
           <span className="font-semibold">Импортировать данные.</span>{" "}
           <span className="text-neutral-content">
             Скопируйте и вставьте свои данные (из Word, Excel, Google Docs и т.п.)
@@ -763,7 +763,7 @@ function ImportModal({
         </div>
 
         <textarea
-          className="h-60 w-full resize-y border-2 border-[var(--app-text-strong)] bg-transparent px-5 py-3 text-sm leading-6 text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none"
+          className="h-56 w-full resize-y border-2 border-[var(--app-text-strong)] bg-transparent px-4 py-3 text-sm leading-6 text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none sm:h-60 sm:px-5"
           placeholder={"Слово 1\tОпределение 1\nСлово 2\tОпределение 2\nСлово 3\tОпределение 3"}
           value={importText}
           onChange={(event) => setImportText(event.target.value)}
@@ -817,7 +817,7 @@ function ImportModal({
                   className="grid grid-cols-[3rem_minmax(0,1fr)] items-center gap-4 rounded-xl bg-[var(--app-panel-strong)] px-5 py-4 md:grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)]"
                 >
                   <div className="text-sm font-medium text-[var(--app-text-strong)]">{index + 1}</div>
-                  <div>
+                  <div className="col-start-2 md:col-start-auto">
                     <div className="rounded-lg bg-[var(--app-field-deep)] px-4 py-3 text-sm text-[var(--app-text-strong)]">
                       {card.term}
                     </div>
@@ -825,7 +825,7 @@ function ImportModal({
                       Термин
                     </div>
                   </div>
-                  <div>
+                  <div className="col-start-2 md:col-start-auto">
                     <div className="rounded-lg bg-[var(--app-field-deep)] px-4 py-3 text-sm text-neutral-content">
                       {card.definition}
                     </div>
@@ -845,17 +845,17 @@ function ImportModal({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 flex justify-end gap-4 border-t border-[var(--app-panel-strong)] bg-[var(--app-modal-bg)] px-8 py-4">
+      <div className="fixed bottom-0 left-0 right-0 flex flex-col-reverse justify-end gap-3 border-t border-[var(--app-panel-strong)] bg-[var(--app-modal-bg)] px-4 py-4 sm:flex-row sm:gap-4 sm:px-8">
         <button
           type="button"
-          className="btn rounded-full border border-[var(--app-border-strong)] bg-transparent px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel)]"
+          className="btn w-full rounded-full border border-[var(--app-border-strong)] bg-transparent px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel)] sm:w-auto"
           onClick={onClose}
         >
           Отменить импорт
         </button>
         <button
           type="button"
-          className="btn btn-primary rounded-full px-8 text-base font-semibold"
+          className="btn btn-primary w-full rounded-full px-8 text-base font-semibold sm:w-auto"
           onClick={onImport}
           disabled={parsedCards.length === 0}
         >
@@ -903,7 +903,7 @@ function ImportSeparatorGroup<T extends string>({
             {option.value === "custom" ? (
               <input
                 type="text"
-                className="input h-12 min-h-12 w-48 rounded-md border-none bg-[var(--app-panel-strong)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none"
+                className="input h-12 min-h-12 min-w-0 flex-1 rounded-md border-none bg-[var(--app-panel-strong)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none sm:w-48 sm:flex-none"
                 placeholder={option.label}
                 value={customValue}
                 onFocus={() => onChange(option.value)}

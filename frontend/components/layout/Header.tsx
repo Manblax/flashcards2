@@ -10,30 +10,44 @@ interface HeaderProps {
 const Header = ({ isAuthenticated }: HeaderProps) => {
   return (
     <header className="bg-base-100 border-b border-neutral/30 sticky top-0 z-10">
-      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 md:flex-nowrap md:gap-4 md:py-4">
         {isAuthenticated ? (
-          <div className="flex items-center gap-4">
-            <button className="btn btn-ghost btn-sm">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <>
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3 lg:hidden">
+              <label
+                htmlFor="app-sidebar"
+                className="btn btn-ghost btn-sm btn-square"
+                aria-label="Открыть меню"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </label>
 
-            <div className="relative">
+              <Link
+                href="/"
+                className="flex items-center text-xl font-bold text-[var(--app-text-strong)]"
+                aria-label="Главная"
+              >
+                Q
+              </Link>
+            </div>
+
+            <div className="relative order-last w-full basis-full md:order-none md:max-w-md md:flex-1 md:basis-auto">
               <input
                 type="text"
                 placeholder="Поиск"
-                className="input input-sm bg-base-200 w-64 pl-10"
+                className="input input-sm w-full bg-base-200 pl-10"
               />
               <svg
                 className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-content"
@@ -49,7 +63,7 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
                 />
               </svg>
             </div>
-          </div>
+          </>
         ) : (
           <Link href="/" className="flex items-center gap-3 text-[var(--app-text-strong)]">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-content">
@@ -68,7 +82,7 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
           </Link>
         )}
 
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {isAuthenticated && (
             <Link
               href="/create"

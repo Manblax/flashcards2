@@ -133,14 +133,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="mb-12 text-4xl font-semibold tracking-normal text-[var(--app-text-strong)] sm:text-5xl">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <h1 className="mb-8 text-3xl font-semibold tracking-normal text-[var(--app-text-strong)] sm:mb-12 sm:text-5xl">
         Настройки
       </h1>
 
       <section>
         <div className="overflow-hidden rounded-none border-x border-t border-[var(--app-border)]">
-          <div className="flex items-center gap-5 border-b border-[var(--app-border)] px-7 py-6">
+          <div className="flex items-center gap-4 border-b border-[var(--app-border)] px-4 py-5 sm:gap-5 sm:px-7 sm:py-6">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-neutral text-base font-semibold text-neutral-content">
               {initials}
             </div>
@@ -175,7 +175,7 @@ export default function SettingsPage() {
             onChange={handleDictionarySourceChange}
           />
         </div>
-        <div className="mt-6 flex items-center justify-end gap-4">
+        <div className="mt-6 flex flex-col items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
           {hasSaved && (
             <span
               className="text-sm font-medium text-success"
@@ -187,7 +187,7 @@ export default function SettingsPage() {
           )}
           <button
             type="button"
-            className="btn btn-primary min-w-40 px-8"
+            className="btn btn-primary w-full px-8 sm:w-auto sm:min-w-40"
             onClick={handleSave}
             disabled={!hasChanges}
           >
@@ -207,7 +207,7 @@ function ThemeSettingsRow({
   onChange: (value: AppTheme) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[var(--app-border)] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
       <div>
         <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Тема
@@ -256,7 +256,7 @@ function PronunciationSettingsRow({
   onChange: (value: PronunciationVariant) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[var(--app-border)] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
       <div>
         <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Звук и транскрипция по умолчанию для новых слов
@@ -305,7 +305,7 @@ function DictionarySourceSettingsRow({
   onChange: (value: DictionarySourcePreference) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[var(--app-border)] px-7 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
       <div>
         <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Словарь
@@ -354,7 +354,7 @@ function SelectChevron() {
 
 function SettingsRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex min-h-24 items-center justify-between gap-8 border-b border-[var(--app-border)] px-7 py-6">
+    <div className="flex min-h-24 flex-col items-start justify-between gap-4 border-b border-[var(--app-border)] px-4 py-5 sm:flex-row sm:items-center sm:gap-8 sm:px-7 sm:py-6">
       <div className="min-w-0">
         <div className="mb-3 text-lg font-semibold text-[var(--app-text-strong)]">{label}</div>
         <div className="truncate text-lg font-normal text-neutral-content">

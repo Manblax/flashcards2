@@ -77,7 +77,7 @@ export default function UserMenu() {
       </div>
       <div
         tabIndex={0}
-        className="dropdown-content right-0 top-full z-[100] mt-3 w-[280px] rounded-lg border border-[var(--app-border)] bg-[var(--app-dropdown-bg)] p-4 shadow-2xl shadow-[var(--app-shadow)]"
+        className="dropdown-content right-0 top-full z-[100] mt-3 w-[min(280px,calc(100vw-2rem))] rounded-lg border border-[var(--app-border)] bg-[var(--app-dropdown-bg)] p-4 shadow-2xl shadow-[var(--app-shadow)]"
       >
         {/* Информация о пользователе */}
         <div className="flex items-center gap-3">

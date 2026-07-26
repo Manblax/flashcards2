@@ -145,8 +145,14 @@
 }
 
 /* Основные стили */
+html {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
 body {
-  @apply bg-base-100 text-base-content;
+  @apply min-h-screen bg-base-100 text-base-content;
+  overflow-x: hidden;
 }
 
 [data-theme="light"] {

@@ -185,9 +185,9 @@ function RegisterPageLayout({
   loginHref?: string;
 }) {
   return (
-    <div className="min-h-[calc(100vh-73px)] flex items-center justify-center px-4 py-10">
+    <div className="flex min-h-[calc(100vh-65px)] items-center justify-center px-4 py-8 sm:py-10">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-[var(--app-text-strong)] mb-3">Регистрация</h1>
+        <h1 className="mb-3 text-2xl font-bold text-[var(--app-text-strong)] sm:text-3xl">Регистрация</h1>
         <p className="mb-8 text-neutral-content">
           Создайте аккаунт, чтобы сохранять свои модули и продолжать занятия с любого устройства.
         </p>

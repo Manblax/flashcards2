@@ -7,12 +7,34 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, isAuthenticated }: MainLayoutProps) => {
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen min-w-0 flex-col">
+        <Header isAuthenticated={false} />
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen">
-      {isAuthenticated && <Sidebar />}
-      <div className="flex-1 flex flex-col">
-        <Header isAuthenticated={isAuthenticated} />
-        <main className="flex-1">{children}</main>
+    <div className="drawer min-h-screen lg:drawer-open">
+      <input
+        id="app-sidebar"
+        type="checkbox"
+        className="drawer-toggle"
+        aria-label="Переключить меню"
+      />
+      <div className="drawer-content flex min-w-0 flex-col">
+        <Header isAuthenticated />
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
+      <div className="drawer-side z-40">
+        <label
+          htmlFor="app-sidebar"
+          aria-label="Закрыть меню"
+          className="drawer-overlay"
+        />
+        <Sidebar />
       </div>
     </div>
   );
