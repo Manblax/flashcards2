@@ -30,7 +30,7 @@ export default function UserMenu() {
     };
 
     const handleStorage = (event: StorageEvent) => {
-      if (!event.key || event.key === "token" || event.key === "user") {
+      if (!event.key || event.key === "user") {
         syncUser();
       }
     };

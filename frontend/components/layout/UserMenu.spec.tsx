@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AUTH_STATE_CHANGE_EVENT, type AuthUser } from "@/lib/auth";
-import { createTestAuthToken } from "@/test/auth-token";
 import UserMenu from "./UserMenu";
 
 const push = vi.fn();
@@ -42,7 +41,6 @@ describe("UserMenu", () => {
   });
 
   it("renders stored user details and settings link", async () => {
-    localStorage.setItem("token", createTestAuthToken());
     localStorage.setItem("user", JSON.stringify(storedUser));
 
     render(<UserMenu />);
@@ -71,10 +69,9 @@ describe("UserMenu", () => {
 
   it("clears the session and routes to login on logout", async () => {
     const user = userEvent.setup();
-    const token = createTestAuthToken();
-    localStorage.setItem("token", token);
+    localStorage.setItem("token", "token-1");
     localStorage.setItem("user", JSON.stringify(storedUser));
-    document.cookie = `token=${token}; path=/`;
+    document.cookie = "token=token-1; path=/";
 
     render(<UserMenu />);
 
@@ -86,14 +83,5 @@ describe("UserMenu", () => {
       expect(push).toHaveBeenCalledWith("/login");
       expect(refresh).toHaveBeenCalled();
     });
-  });
-
-  it("does not show a stale user without an active token", () => {
-    localStorage.setItem("user", JSON.stringify(storedUser));
-
-    render(<UserMenu />);
-
-    expect(screen.getByRole("link", { name: "Войти" })).toBeInTheDocument();
-    expect(screen.queryByText("demo@example.com")).not.toBeInTheDocument();
   });
 });

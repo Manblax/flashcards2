@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { DICTIONARY_SOURCE_SETTING_KEY } from "./dictionary-settings";
-import { createTestAuthToken } from "@/test/auth-token";
 import {
   createModule,
   deleteModule,
@@ -14,7 +13,6 @@ import {
   register,
   updateModule,
   uploadFile,
-  validateAuthToken,
 } from "./api";
 
 describe("api utilities", () => {
@@ -26,26 +24,6 @@ describe("api utilities", () => {
     expect(getGoogleAuthUrl()).toBe("http://localhost:3001/auth/google");
   });
 
-  it("validates authentication without clearing it on backend outages", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-      .mockResolvedValueOnce(new Response(null, { status: 401 }))
-      .mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    vi.stubGlobal("fetch", fetchMock);
-
-    await expect(validateAuthToken("valid-token")).resolves.toBe(true);
-    await expect(validateAuthToken("invalid-token")).resolves.toBe(false);
-    await expect(validateAuthToken("unknown-token")).resolves.toBeNull();
-
-    expect(fetchMock.mock.calls[0][0]).toBe(
-      "http://localhost:3001/auth/session",
-    );
-    expect(
-      fetchMock.mock.calls[0][1].headers.get("Authorization"),
-    ).toBe("Bearer valid-token");
-  });
-
   it("does not request modules when there is no auth token", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -55,8 +33,7 @@ describe("api utilities", () => {
   });
 
   it("requests modules with bearer auth when a token is stored", async () => {
-    const storedToken = createTestAuthToken();
-    localStorage.setItem("token", storedToken);
+    localStorage.setItem("token", "stored-token");
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify([{ id: "module-1" }]), {
         status: 200,
@@ -69,11 +46,11 @@ describe("api utilities", () => {
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("http://localhost:3001/flashcards?skip=20&take=10");
-    expect(init.headers.get("Authorization")).toBe(`Bearer ${storedToken}`);
+    expect(init.headers.get("Authorization")).toBe("Bearer stored-token");
   });
 
   it("returns an empty module list for unauthorized responses", async () => {
-    localStorage.setItem("token", createTestAuthToken());
+    localStorage.setItem("token", "stored-token");
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response(null, { status: 401 })),
@@ -176,8 +153,7 @@ describe("api utilities", () => {
   });
 
   it("looks up dictionary entries with the stored source preference", async () => {
-    const storedToken = createTestAuthToken();
-    localStorage.setItem("token", storedToken);
+    localStorage.setItem("token", "stored-token");
     localStorage.setItem(DICTIONARY_SOURCE_SETTING_KEY, "oxford");
     const lookupResult = {
       word: "run",
@@ -203,7 +179,7 @@ describe("api utilities", () => {
     expect(url).toBe(
       "http://localhost:3001/dictionary/lookup?word=run&source=oxford",
     );
-    expect(init.headers.get("Authorization")).toBe(`Bearer ${storedToken}`);
+    expect(init.headers.get("Authorization")).toBe("Bearer stored-token");
   });
 
   it("uploads a file as form data", async () => {

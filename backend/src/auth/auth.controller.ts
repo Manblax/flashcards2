@@ -6,20 +6,11 @@ import {
   Query,
   Res,
   InternalServerErrorException,
-  UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { CurrentUser } from './decorators/current-user.decorator';
-import type { JwtUser } from './interfaces/jwt-user.interface';
 import type { Response } from 'express';
 
 @ApiTags('Auth')
@@ -41,19 +32,6 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
-  }
-
-  @Get('session')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Validate the current authentication session' })
-  @ApiResponse({ status: 200, description: 'Authentication is valid' })
-  @ApiResponse({ status: 401, description: 'Authentication is invalid' })
-  session(@CurrentUser() user: JwtUser) {
-    return {
-      authenticated: true,
-      user,
-    };
   }
 
   @Get('google')
