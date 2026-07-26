@@ -68,6 +68,13 @@ jobs:
         run: ${{ matrix.test-command }}
         working-directory: ${{ matrix.path }}
 
+      - name: Verify Prisma production dependency
+        if: ${{ matrix.path == 'backend' }}
+        run: |
+          npm ci --omit=dev
+          npx --no-install prisma validate
+        working-directory: backend
+
   frontend-e2e:
     name: Frontend E2E
     runs-on: ubuntu-latest
@@ -105,3 +112,77 @@ jobs:
           name: playwright-report
           path: frontend/playwright-report/
           retention-days: 7
+
+  production-config:
+    name: Production configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate production Compose
+        run: |
+          docker compose \
+            --env-file .env.production.example \
+            -f docker-compose.production.yml \
+            config --quiet
+
+      - name: Confirm only Nginx publishes ports
+        run: |
+          published_ports="$(
+            docker compose \
+              --env-file .env.production.example \
+              -f docker-compose.production.yml \
+              config --format json |
+              jq -r '
+                .services
+                | to_entries[]
+                | select(.value.ports != null)
+                | .key as $service
+                | .value.ports[]
+                | "\($service):\(.target)"
+              ' |
+              sort
+          )"
+
+          expected_ports=$'nginx:443\nnginx:80'
+          if [[ "$published_ports" != "$expected_ports" ]]; then
+            echo "::error::Only Nginx ports 80 and 443 may be published."
+            printf 'Found:\n%s\n' "$published_ports"
+            exit 1
+          fi
+
+      - name: Validate Nginx configuration and routing
+        run: |
+          certificate_dir="$RUNNER_TEMP/letsencrypt/live/flashcards2"
+          rendered_config="$RUNNER_TEMP/nginx-rendered.conf"
+          mkdir -p "$certificate_dir"
+          openssl req \
+            -x509 \
+            -newkey rsa:2048 \
+            -nodes \
+            -days 1 \
+            -subj "/CN=app.example.com" \
+            -keyout "$certificate_dir/privkey.pem" \
+            -out "$certificate_dir/fullchain.pem"
+
+          docker run --rm \
+            --add-host frontend:127.0.0.1 \
+            --add-host backend:127.0.0.1 \
+            -e FRONTEND_HOST=app.example.com \
+            -e API_HOST=api.example.com \
+            -e CLIENT_MAX_BODY_SIZE=10m \
+            -e 'NGINX_ENVSUBST_FILTER=^(FRONTEND_HOST|API_HOST|CLIENT_MAX_BODY_SIZE)$' \
+            -v "$GITHUB_WORKSPACE/deploy/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro" \
+            -v "$RUNNER_TEMP/letsencrypt:/etc/letsencrypt:ro" \
+            nginx:stable-alpine \
+            nginx -T > "$rendered_config"
+
+          grep -F 'server_name app.example.com api.example.com;' "$rendered_config"
+          grep -F 'return 301 https://$host$request_uri;' "$rendered_config"
+          grep -F 'proxy_pass http://frontend:3000;' "$rendered_config"
+          grep -F 'proxy_pass http://backend:3001;' "$rendered_config"
+          grep -F 'proxy_set_header X-Forwarded-Proto $scheme;' "$rendered_config"
+          grep -F 'proxy_set_header Upgrade $http_upgrade;' "$rendered_config"
+          grep -F 'client_max_body_size 10m;' "$rendered_config"
+          grep -F 'location /.well-known/acme-challenge/' "$rendered_config"

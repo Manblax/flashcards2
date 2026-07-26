@@ -61,10 +61,16 @@ jobs:
       - name: Validate production frontend URL
         if: ${{ matrix.image == 'frontend' }}
         env:
+          API_HOST: ${{ vars.API_HOST }}
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
         run: |
-          if [[ ! "$NEXT_PUBLIC_API_URL" =~ ^https?://[^/]+ ]]; then
-            echo "::error::Set the NEXT_PUBLIC_API_URL repository variable to the production API origin, for example https://api.example.com"
+          if [[ -z "$API_HOST" || "$API_HOST" == *"://"* || "$API_HOST" == */* ]]; then
+            echo "::error::Set API_HOST to the production API DNS name, for example api.example.com"
+            exit 1
+          fi
+
+          if [[ "$NEXT_PUBLIC_API_URL" != "https://$API_HOST" ]]; then
+            echo "::error::NEXT_PUBLIC_API_URL must equal https://$API_HOST"
             exit 1
           fi
 

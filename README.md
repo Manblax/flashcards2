@@ -102,22 +102,17 @@ Docker Compose использует localhost по умолчанию. Чтоб�
 cp .env.example .env
 ```
 
-Для локальной разработки значения из примера можно оставить без изменений. Для
-production укажите публичные HTTPS-адреса:
-
-```dotenv
-FRONTEND_URL=https://cards.example.com
-NEXT_PUBLIC_API_URL=https://api.example.com
-GOOGLE_CALLBACK_URL=https://api.example.com/auth/google/callback
-INTERNAL_API_URL=http://backend:3001
-DICTIONARY_SERVICE_URL=http://dictionary-service:4000
-```
+Для локальной разработки значения из примера можно оставить без изменений.
 
 `NEXT_PUBLIC_API_URL` встраивается во frontend во время сборки Docker-образа.
-Поэтому в GitHub необходимо создать Actions repository variable с именем
-`NEXT_PUBLIC_API_URL` и production API origin в качестве значения. CD проверит
-эту переменную перед публикацией frontend-образа. Остальные адреса передаются
-контейнерам при запуске через `.env`.
+Поэтому в GitHub необходимо создать две Actions repository variables:
+
+- `API_HOST` — DNS-имя API без схемы, например `api.example.com`;
+- `NEXT_PUBLIC_API_URL` — соответствующий HTTPS origin, например
+  `https://api.example.com`.
+
+CD проверит, что эти значения соответствуют друг другу, перед публикацией
+frontend-образа.
 
 CI намеренно использует localhost-адреса: они нужны только для изолированной
 сборки и тестов. Production-домен используется в CD при сборке публикуемого
@@ -125,6 +120,58 @@ frontend-образа.
 
 Файлы `.env` не коммитятся. Секреты (`JWT_SECRET`, Google OAuth credentials и
 пароли базы данных) также должны храниться только в окружении production.
+
+### Production с Nginx и Let’s Encrypt
+
+Production использует отдельный Compose-файл. Публично открыты только порты 80
+и 443 контейнера Nginx. Frontend, backend, dictionary service и PostgreSQL
+доступны только во внутренней Docker-сети.
+
+Перед первым запуском:
+
+1. Создайте DNS-записи для frontend и API, направленные на VPS.
+2. Откройте входящие TCP-порты 80 и 443.
+3. Авторизуйте VPS в GHCR: `docker login ghcr.io`.
+4. Скопируйте и заполните production-окружение:
+
+```bash
+cp .env.production.example .env.production
+```
+
+`IMAGE_TAG` должен быть неизменяемым `sha-*` тегом, опубликованным CD.
+`NEXT_PUBLIC_API_URL` должен совпадать с адресом, встроенным в выбранный
+frontend-образ. Если пароль PostgreSQL содержит специальные URL-символы, в
+`DATABASE_URL` его необходимо percent-encode. Внутренние адреса
+`INTERNAL_API_URL` и `DICTIONARY_SERVICE_URL` оставьте со значениями из примера:
+они используют имена сервисов в закрытой Docker-сети.
+
+Первый запуск получает один SAN-сертификат для обоих доменов и поднимает стек:
+
+```bash
+./scripts/init-production-tls.sh .env.production
+```
+
+Для обновления измените `IMAGE_TAG` и выполните:
+
+```bash
+./scripts/deploy-production.sh .env.production
+```
+
+Скрипт проверит конфигурацию, скачает образы, убедится, что frontend собран для
+нужного API origin, применит Prisma migrations и перезапустит сервисы. Для
+rollback верните предыдущий `sha-*` тег и повторите ту же команду.
+
+Проверка состояния и сертификатов:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml ps
+docker compose --env-file .env.production -f docker-compose.production.yml logs certbot
+docker compose --env-file .env.production -f docker-compose.production.yml exec certbot certbot certificates
+docker compose --env-file .env.production -f docker-compose.production.yml exec certbot certbot renew --dry-run --webroot --webroot-path /var/www/certbot
+```
+
+Certbot проверяет продление каждые 12 часов, а Nginx перечитывает сертификаты
+каждые 6 часов.
 
 ## Скрипты
 
@@ -181,7 +228,10 @@ flashcards2/
 │   ├── lib/                     # API client for backend calls
 │   ├── types/                   # Shared TS types for frontend
 │   └── package.json             # Frontend package manifest
-├── docker-compose.yml           # PostgreSQL + pgAdmin
+├── deploy/nginx/                # Production reverse-proxy configuration
+├── scripts/                     # Production TLS bootstrap and deployment
+├── docker-compose.yml           # Development stack
+├── docker-compose.production.yml # Production stack
 └── README.md
 ```
 

@@ -1,0 +1,219 @@
+name: flashcards2-production
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - private
+
+  dictionary-service:
+    image: ghcr.io/manblax/flashcards2-dictionary-service:${IMAGE_TAG:?Set IMAGE_TAG to a published sha-* tag}
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      DICTIONARY_TIMEOUT_MS: ${DICTIONARY_TIMEOUT_MS:-6000}
+    expose:
+      - "4000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:4000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 10s
+    networks:
+      - private
+
+  backend-migrate:
+    image: ghcr.io/manblax/flashcards2-backend:${IMAGE_TAG:?Set IMAGE_TAG to a published sha-* tag}
+    restart: "no"
+    command:
+      - ./node_modules/.bin/prisma
+      - migrate
+      - deploy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - private
+
+  backend:
+    image: ghcr.io/manblax/flashcards2-backend:${IMAGE_TAG:?Set IMAGE_TAG to a published sha-* tag}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      FRONTEND_URL: https://${FRONTEND_HOST:?Set FRONTEND_HOST}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?Set GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: https://${API_HOST:?Set API_HOST}/auth/google/callback
+      DICTIONARY_SERVICE_URL: ${DICTIONARY_SERVICE_URL:?Set DICTIONARY_SERVICE_URL}
+      DICTIONARY_CACHE_TTL_DAYS: ${DICTIONARY_CACHE_TTL_DAYS:-30}
+      DICTIONARY_BACKEND_TIMEOUT_MS: ${DICTIONARY_BACKEND_TIMEOUT_MS:-9000}
+    expose:
+      - "3001"
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      backend-migrate:
+        condition: service_completed_successfully
+      dictionary-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3001/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 15s
+    networks:
+      - private
+
+  frontend:
+    image: ghcr.io/manblax/flashcards2-frontend:${IMAGE_TAG:?Set IMAGE_TAG to a published sha-* tag}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL}
+      INTERNAL_API_URL: ${INTERNAL_API_URL:?Set INTERNAL_API_URL}
+    expose:
+      - "3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 20s
+    networks:
+      - private
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    environment:
+      FRONTEND_HOST: ${FRONTEND_HOST:?Set FRONTEND_HOST}
+      API_HOST: ${API_HOST:?Set API_HOST}
+      CLIENT_MAX_BODY_SIZE: ${CLIENT_MAX_BODY_SIZE:-10m}
+      NGINX_ENVSUBST_FILTER: ^(FRONTEND_HOST|API_HOST|CLIENT_MAX_BODY_SIZE)$
+    command:
+      - /bin/sh
+      - -c
+      - |
+        while :; do
+          sleep 6h
+          nginx -s reload
+        done &
+        exec nginx -g 'daemon off;'
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - certbot_www:/var/www/certbot:ro
+      - letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q --spider http://127.0.0.1/healthz || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - private
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+    command:
+      - |
+        trap exit TERM
+        while :; do
+          certbot renew --webroot --webroot-path /var/www/certbot --quiet
+          sleep 12h
+        done
+    volumes:
+      - certbot_www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+    depends_on:
+      nginx:
+        condition: service_healthy
+    networks:
+      - private
+
+  certbot-init:
+    image: certbot/certbot:latest
+    profiles:
+      - tls-init
+    restart: "no"
+    ports:
+      - "80:80"
+    command:
+      - certonly
+      - --standalone
+      - --non-interactive
+      - --agree-tos
+      - --no-eff-email
+      - --cert-name
+      - flashcards2
+      - --email
+      - ${LETSENCRYPT_EMAIL:?Set LETSENCRYPT_EMAIL}
+      - --server
+      - ${LETSENCRYPT_SERVER:-https://acme-v02.api.letsencrypt.org/directory}
+      - -d
+      - ${FRONTEND_HOST:?Set FRONTEND_HOST}
+      - -d
+      - ${API_HOST:?Set API_HOST}
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+    networks:
+      - private
+
+networks:
+  private:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  backend_uploads:
+  certbot_www:
+  letsencrypt:
