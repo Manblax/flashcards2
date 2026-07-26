@@ -93,6 +93,39 @@ npm run dev
 
 Frontend запускается на `http://localhost:3000`.
 
+### Домены для разработки и production
+
+Docker Compose использует localhost по умолчанию. Чтобы переопределить адреса,
+скопируйте корневой пример окружения и измените нужные значения:
+
+```bash
+cp .env.example .env
+```
+
+Для локальной разработки значения из примера можно оставить без изменений. Для
+production укажите публичные HTTPS-адреса:
+
+```dotenv
+FRONTEND_URL=https://cards.example.com
+NEXT_PUBLIC_API_URL=https://api.example.com
+GOOGLE_CALLBACK_URL=https://api.example.com/auth/google/callback
+INTERNAL_API_URL=http://backend:3001
+DICTIONARY_SERVICE_URL=http://dictionary-service:4000
+```
+
+`NEXT_PUBLIC_API_URL` встраивается во frontend во время сборки Docker-образа.
+Поэтому в GitHub необходимо создать Actions repository variable с именем
+`NEXT_PUBLIC_API_URL` и production API origin в качестве значения. CD проверит
+эту переменную перед публикацией frontend-образа. Остальные адреса передаются
+контейнерам при запуске через `.env`.
+
+CI намеренно использует localhost-адреса: они нужны только для изолированной
+сборки и тестов. Production-домен используется в CD при сборке публикуемого
+frontend-образа.
+
+Файлы `.env` не коммитятся. Секреты (`JWT_SECRET`, Google OAuth credentials и
+пароли базы данных) также должны храниться только в окружении production.
+
 ## Скрипты
 
 ### Frontend (`frontend/`)

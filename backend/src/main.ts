@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // Включаем CORS для фронтенда
   app.enableCors({
-    origin: '*', // Для разработки можно разрешить всем, или указать 'http://localhost:3001'
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
