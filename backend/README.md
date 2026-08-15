@@ -1,98 +1,174 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# FlashCards2 Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS API для авторизации, пользовательских модулей, загрузки изображений и
+доступа к словарным данным. Backend — единственный сервис проекта, который
+работает с PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Стек
 
-## Description
+- NestJS 11
+- Prisma 6
+- PostgreSQL 15
+- Passport JWT и `@nestjs/jwt`
+- Swagger/OpenAPI
+- Multer и `@nestjs/serve-static`
+- Jest
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+По умолчанию сервер доступен на `http://localhost:3001`. Swagger UI находится
+на `/api/docs`, OpenAPI JSON — на `/api/docs-json`.
 
-## Project setup
+## Модули
 
-```bash
-$ npm install
+| Каталог | Назначение |
+| --- | --- |
+| `src/auth/` | Регистрация, парольный вход, Google OAuth, выпуск и проверка JWT |
+| `src/flashcards/` | CRUD модулей и вложенных терминов с проверкой владельца |
+| `src/dictionary/` | Кеш словарных ответов, вызов dictionary-service и аудиопрокси |
+| `src/uploads/` | Загрузка файлов и выдача URL из `/uploads` |
+| `src/prisma/` | Общий Prisma client и lifecycle подключения |
+| `prisma/` | Схема базы данных и миграции |
+
+## Модель данных
+
+- `User`: уникальные `email` и `username`, bcrypt-хеш пароля.
+- `Module`: название, описание, автор, владелец и количество терминов.
+- `Term`: термин, определение, изображение, избранное и позиция в модуле.
+- `DictionaryEntry`: кеш нормализованного словарного ответа по паре
+  `(normalizedWord, dictionarySource)`.
+- `DictionaryAudio`: стабильный ID и upstream URL аудиофайла.
+
+Удаление пользователя каскадно удаляет его модули, а удаление модуля — термины.
+При обновлении модуля список терминов пересоздаётся транзакционно; ID терминов
+после сохранения могут измениться.
+
+## Авторизация и доступ к модулям
+
+`POST /auth/register` и `POST /auth/login` возвращают JWT со сроком жизни 60
+минут. Защищённые маршруты используют `AuthGuard('jwt')` и ожидают заголовок:
+
+```http
+Authorization: Bearer <token>
 ```
 
-## Compile and run the project
+Google OAuth реализован напрямую через OAuth endpoints Google:
 
-```bash
-# development
-$ npm run start
+1. `GET /auth/google` перенаправляет пользователя на Google.
+2. `GET /auth/google/callback` обменивает `code` на профиль.
+3. Backend перенаправляет на frontend `/auth/callback` с токеном и профилем в
+   query string.
 
-# watch mode
-$ npm run start:dev
+Доступ к модулю разрешён, если `Module.userId` совпадает с ID пользователя. Для
+старых записей также поддерживается ветка `userId IS NULL AND author = username`.
+Чужой или отсутствующий модуль возвращает 404, а не 403.
 
-# production mode
-$ npm run start:prod
+## API
+
+### Состояние
+
+- `GET /` — простой ответ для healthcheck backend.
+
+### Авторизация
+
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/google`
+- `GET /auth/google/callback`
+
+### Модули — Bearer JWT обязателен
+
+- `POST /flashcards`
+- `GET /flashcards?skip=0&take=20`
+- `GET /flashcards/:id`
+- `PATCH /flashcards/:id`
+- `DELETE /flashcards/:id`
+
+### Словарь
+
+- `GET /dictionary/lookup?word=<word>&source=cambridge|oxford` — требует JWT.
+- `GET /dictionary/audio/:id` — публичный аудиопрокси; `<audio>` не может
+  отправить Bearer-заголовок.
+
+Словарный lookup сначала проверяет PostgreSQL-кеш, затем вызывает внутренний
+`dictionary-service`. Срок кеша задаёт `DICTIONARY_CACHE_TTL_DAYS`.
+
+### Загрузки
+
+- `POST /upload` — multipart form-data, поле `file`.
+- `/uploads/*` — статическая раздача загруженных файлов.
+
+Текущий upload endpoint не защищён JWT и не ограничивает MIME-тип или размер
+файла. Это известное ограничение, которое необходимо учитывать при публичном
+развёртывании.
+
+## Переменные окружения
+
+| Переменная | Назначение | Значение по умолчанию |
+| --- | --- | --- |
+| `PORT` | Порт backend | `3001` |
+| `DATABASE_URL` | PostgreSQL connection string | обязательно |
+| `JWT_SECRET` | Подпись JWT | небезопасный dev fallback |
+| `FRONTEND_URL` | CORS origin и OAuth redirect target | `http://localhost:3000` |
+| `GOOGLE_CLIENT_ID` | Google OAuth client | нужен только для Google OAuth |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth secret | нужен только для Google OAuth |
+| `GOOGLE_CALLBACK_URL` | Google callback URL | `http://localhost:3001/auth/google/callback` |
+| `DICTIONARY_SERVICE_URL` | Адрес внутреннего dictionary-service | `http://localhost:4000` вне Compose |
+| `DICTIONARY_CACHE_TTL_DAYS` | Срок словарного кеша | `30` |
+| `DICTIONARY_BACKEND_TIMEOUT_MS` | Таймаут backend → dictionary-service | `9000` |
+
+Для Docker development создайте `backend/.env`:
+
+```dotenv
+DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/flashcards_db
+JWT_SECRET=dev-secret-change-me
+FRONTEND_URL=http://localhost:3000
+GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
+DICTIONARY_SERVICE_URL=http://dictionary-service:4000
 ```
 
-## Run tests
+## Установка и запуск
+
+Из корня репозитория:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm --prefix backend install
+(cd backend && npx prisma generate && npx prisma migrate deploy)
+npm --prefix backend run start:dev
 ```
 
-## Deployment
+При запуске backend на хосте используйте PostgreSQL и dictionary-service через
+`localhost`. В Docker Compose используются имена сервисов `postgres` и
+`dictionary-service`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Prisma
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+cd backend
+
+# Обновить Prisma Client после изменения schema.prisma
+npx prisma generate
+
+# Создать development migration
+npx prisma migrate dev --name <migration-name>
+
+# Применить готовые migrations
+npx prisma migrate deploy
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Изменение `schema.prisma` всегда требует повторного `prisma generate`.
 
-## Resources
+## Проверки
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm --prefix backend run build
+npm --prefix backend test -- --runInBand
+npm --prefix backend run test:e2e
+npm --prefix backend run test:cov
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+`npm run lint` запускает ESLint с `--fix` и может изменить файлы.
 
-## Support
+## Связанные сервисы
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Общий запуск и production: [корневой README](../README.md)
+- Frontend: [frontend/PROJECT_OVERVIEW.md](../frontend/PROJECT_OVERVIEW.md)
+- Внутренний dictionary-service: `../dictionary-service/`

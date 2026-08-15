@@ -1,252 +1,276 @@
 # FlashCards2
 
-Полнофункциональное приложение для изучения материалов через флэш-карточки.
+Веб-приложение для создания собственных наборов терминов, работы со словарными
+подсказками и изучения материала в интерактивных режимах.
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![React](https://img.shields.io/badge/React-19-149eca)
 ![NestJS](https://img.shields.io/badge/NestJS-11-e0234e)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169e1)
 
-## Текущее состояние
+## Возможности
 
-### Реализовано
+- Регистрация, вход по логину или email и Google OAuth.
+- Защищённые пользовательские модули с созданием, редактированием, удалением и
+  сохранённым порядком терминов.
+- Главная страница с недавними модулями и библиотека с постраничной загрузкой.
+- Подсказки из Cambridge или Oxford при редактировании терминов.
+- UK/US-произношение через проксируемые словарные аудиофайлы.
+- Четыре цветовые темы: `dark-classic`, `light-classic`, `light` и `dark`.
+- Режим `write`: ввод термина по определению, проверка ответа, повтор ошибок по
+  этапам, ручная переоценка и итоговая сводка.
+- Восстановление незавершённого `write`-упражнения после обновления страницы в
+  пределах текущей вкладки.
+- Адаптивный интерфейс для мобильных и десктопных экранов.
 
-- Главная страница с последними модулями
-- Библиотека с бесконечной прокруткой
-- Группировка модулей по времени (эта неделя, прошлая неделя, старше)
-- Просмотр модуля и списка терминов
-- Создание, редактирование и удаление модулей
-- Загрузка изображений для терминов
-- Регистрация и вход пользователя (JWT возвращается backend'ом)
-- Вход и регистрация через Google OAuth
-- PostgreSQL + Prisma для хранения пользователей, модулей и терминов
+Кнопки «Карточки», «Заучивание» и «Тест» пока не имеют учебной логики. Полностью
+реализованный учебный режим на данный момент — `write`.
 
-### В работе
+## Архитектура
 
-- Учебные режимы (карточки/заучивание/тест) на странице модуля
-- Полноценная серверная авторизация для защищенных операций
+Репозиторий содержит три самостоятельных npm-проекта. npm workspaces не
+используются.
 
-## Технологический стек
+| Сервис | Технологии | Порт | Назначение |
+| --- | --- | --- | --- |
+| `frontend/` | Next.js 16, React 19, Tailwind CSS 4, DaisyUI 5 | 3000 | UI, маршруты и клиентское состояние |
+| `backend/` | NestJS 11, Prisma 6, JWT/Passport | 3001 | Авторизация, CRUD модулей, словарный кеш и загрузки |
+| `dictionary-service/` | NestJS 11, Cheerio | 4000, только внутренняя сеть | Получение и нормализация данных Cambridge/Oxford |
+| PostgreSQL | PostgreSQL 15 | 5432 | Пользователи, модули, термины и словарный кеш |
 
-### Frontend (`frontend/`)
+Основной поток данных:
 
-- Next.js 16.0.10 (App Router)
-- React 19.2.1
-- TypeScript 5
-- Tailwind CSS 4
-- DaisyUI 5.5.13
-
-### Backend (`backend/`)
-
-- NestJS 11
-- Prisma 6.19.1
-- PostgreSQL 15 (через Docker)
-- JWT + Passport для аутентификации
-- Multer для загрузки файлов
-
-## Быстрый старт
-
-### 1. Установка зависимостей
-
-```bash
-(cd frontend && npm install)
-(cd backend && npm install)
+```text
+Browser
+  └─ Next.js frontend
+       └─ NestJS backend
+            ├─ PostgreSQL
+            └─ dictionary-service
+                 ├─ Cambridge Dictionary
+                 └─ Oxford Learner's Dictionaries
 ```
 
-### 2. Поднять PostgreSQL
+Backend — единственный сервис, который обращается к PostgreSQL.
+`dictionary-service` не хранит состояние и не публикуется наружу в production.
 
-```bash
-docker compose up -d
+## Быстрый старт через Docker
+
+### 1. Подготовьте окружение
+
+Docker Compose требует файл `backend/.env`, даже если большая часть значений
+переопределяется в `docker-compose.yml`:
+
+```dotenv
+DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/flashcards_db
+JWT_SECRET=dev-secret-change-me
+FRONTEND_URL=http://localhost:3000
+GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
+DICTIONARY_SERVICE_URL=http://dictionary-service:4000
 ```
 
-Сервис базы данных поднимается на `localhost:5432`, pgAdmin на `localhost:5050`.
+Google OAuth необязателен для обычной регистрации. Для него дополнительно
+укажите `GOOGLE_CLIENT_ID` и `GOOGLE_CLIENT_SECRET`.
 
-### 3. Запустить backend
-
-```bash
-# terminal 1
-cd backend
-npx prisma migrate deploy
-npm run start:dev
-```
-
-Backend запускается на `http://localhost:3001`.
-
-Интерактивная Swagger-документация доступна на `http://localhost:3001/api/docs`,
-OpenAPI JSON — на `http://localhost:3001/api/docs-json`.
-
-Для Google OAuth нужно заполнить переменные в `backend/.env`:
-
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-- `GOOGLE_CALLBACK_URL` (по умолчанию `http://localhost:3001/auth/google/callback`)
-- `FRONTEND_URL` (по умолчанию `http://localhost:3000`)
-
-### 4. Запустить frontend
-
-```bash
-# terminal 2
-cd frontend
-npm run dev
-```
-
-Frontend запускается на `http://localhost:3000`.
-
-### Домены для разработки и production
-
-Docker Compose использует localhost по умолчанию. Чтобы переопределить адреса,
-скопируйте корневой пример окружения и измените нужные значения:
+При необходимости переопределить публичные или внутренние URL:
 
 ```bash
 cp .env.example .env
 ```
 
-Для локальной разработки значения из примера можно оставить без изменений.
-
-`NEXT_PUBLIC_API_URL` встраивается во frontend во время сборки Docker-образа.
-Поэтому в GitHub необходимо создать две Actions repository variables:
-
-- `API_HOST` — DNS-имя API без схемы, например `api.example.com`;
-- `NEXT_PUBLIC_API_URL` — соответствующий HTTPS origin, например
-  `https://api.example.com`.
-
-CD проверит, что эти значения соответствуют друг другу, перед публикацией
-frontend-образа.
-
-CI намеренно использует localhost-адреса: они нужны только для изолированной
-сборки и тестов. Production-домен используется в CD при сборке публикуемого
-frontend-образа.
-
-Файлы `.env` не коммитятся. Секреты (`JWT_SECRET`, Google OAuth credentials и
-пароли базы данных) также должны храниться только в окружении production.
-
-### Production с Nginx и Let’s Encrypt
-
-Production использует отдельный Compose-файл. Публично открыты только порты 80
-и 443 контейнера Nginx. Frontend, backend, dictionary service и PostgreSQL
-доступны только во внутренней Docker-сети.
-
-Перед первым запуском:
-
-1. Создайте DNS-записи для frontend и API, направленные на VPS.
-2. Откройте входящие TCP-порты 80 и 443.
-3. Авторизуйте VPS в GHCR: `docker login ghcr.io`.
-4. Скопируйте и заполните production-окружение:
+### 2. Запустите стек
 
 ```bash
-cp .env.production.example .env.production
+docker compose up -d
 ```
 
-`IMAGE_TAG` должен быть неизменяемым `sha-*` тегом, опубликованным CD.
-`NEXT_PUBLIC_API_URL` должен совпадать с адресом, встроенным в выбранный
-frontend-образ. Если пароль PostgreSQL содержит специальные URL-символы, в
-`DATABASE_URL` его необходимо percent-encode. Внутренние адреса
-`INTERNAL_API_URL` и `DICTIONARY_SERVICE_URL` оставьте со значениями из примера:
-они используют имена сервисов в закрытой Docker-сети.
+Команда запускает весь development-стек:
 
-Первый запуск получает один SAN-сертификат для обоих доменов и поднимает стек:
+- frontend: [http://localhost:3000](http://localhost:3000)
+- backend: [http://localhost:3001](http://localhost:3001)
+- Swagger: [http://localhost:3001/api/docs](http://localhost:3001/api/docs)
+- pgAdmin: [http://localhost:5050](http://localhost:5050)
+- PostgreSQL: `localhost:5432`
+
+Проверка состояния и логов:
 
 ```bash
-./scripts/init-production-tls.sh .env.production
+docker compose ps
+docker compose logs -f frontend backend dictionary-service
 ```
 
-Для обновления измените `IMAGE_TAG` и выполните:
+## Локальный запуск без полного Compose-стека
+
+### 1. Установите зависимости
 
 ```bash
-./scripts/deploy-production.sh .env.production
+npm --prefix frontend install
+npm --prefix backend install
+npm --prefix dictionary-service install
 ```
 
-Скрипт проверит конфигурацию, скачает образы, убедится, что frontend собран для
-нужного API origin, применит Prisma migrations и перезапустит сервисы. Для
-rollback верните предыдущий `sha-*` тег и повторите ту же команду.
-
-Проверка состояния и сертификатов:
+### 2. Запустите PostgreSQL
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml ps
-docker compose --env-file .env.production -f docker-compose.production.yml logs certbot
-docker compose --env-file .env.production -f docker-compose.production.yml exec certbot certbot certificates
-docker compose --env-file .env.production -f docker-compose.production.yml exec certbot certbot renew --dry-run --webroot --webroot-path /var/www/certbot
+docker compose up -d postgres
 ```
 
-Certbot проверяет продление каждые 12 часов, а Nginx перечитывает сертификаты
-каждые 6 часов.
+Для процесса backend, запущенного на хосте, создайте `backend/.env` с адресом
+базы через `localhost`:
 
-## Скрипты
+```dotenv
+DATABASE_URL=postgresql://myuser:mypassword@localhost:5432/flashcards_db
+JWT_SECRET=dev-secret-change-me
+FRONTEND_URL=http://localhost:3000
+GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
+DICTIONARY_SERVICE_URL=http://localhost:4000
+```
 
-### Frontend (`frontend/`)
+### 3. Примените миграции и запустите сервисы
 
 ```bash
-cd frontend
-npm run dev
-npm run build
-npm run start
-npm run lint
-npm run test
-npm run test:e2e
+(cd backend && npx prisma generate && npx prisma migrate deploy)
+npm --prefix dictionary-service run start:dev
+npm --prefix backend run start:dev
+npm --prefix frontend run dev
 ```
 
-### Backend (`backend/`)
+Каждую команду `start:dev` запускайте в отдельном терминале.
 
-```bash
-cd backend
-npm run start:dev
-npm run build
-npm run start:prod
-npm run test
-npm run test:e2e
-```
+## Основные frontend-маршруты
 
-### Все unit tests
+| Маршрут | Доступ | Назначение |
+| --- | --- | --- |
+| `/` | публичный | Гостевой экран или последние модули пользователя |
+| `/register`, `/login` | публичный | Регистрация и вход |
+| `/library` | защищённый | Библиотека модулей |
+| `/create` | защищённый | Создание модуля |
+| `/module/[id]` | защищённый | Просмотр терминов и выбор режима |
+| `/module/[id]/edit` | защищённый | Редактирование модуля и терминов |
+| `/module/[id]/write` | защищённый | Письменное упражнение |
+| `/settings` | защищённый | Тема, источник словаря и вариант произношения |
 
-```bash
-npm test
-```
+### Как работает режим `write`
 
-### E2E tests
+1. Все термины модуля перемешиваются.
+2. Пользователь видит определение и вводит термин.
+3. Регистр и пробелы по краям игнорируются; орфография, пунктуация и внутренние
+   пробелы должны совпасть.
+4. «Не знаю» считается ошибкой. Ошибочную оценку можно вручную изменить через
+   «Я ответил правильно».
+5. После завершения этапа только неосвоенные термины переходят в новый
+   перемешанный этап.
+6. Упражнение заканчивается, когда все термины отвечены правильно.
 
-```bash
-npm run test:e2e
-```
+Состояние хранится в `sessionStorage` под ключом
+`flashcards2:write:<moduleId>`. Оно сбрасывается при изменении состава модуля,
+явном перезапуске или закрытии вкладки.
 
-## Структура проекта
+## API
 
-```text
-flashcards2/
-├── backend/
-│   ├── src/
-│   │   ├── auth/                # register/login + JWT strategy
-│   │   ├── flashcards/          # CRUD for modules/terms
-│   │   ├── uploads/             # image upload endpoint
-│   │   └── prisma/              # Prisma service/module
-│   ├── prisma/                  # schema + migrations
-│   └── uploads/                 # uploaded files
-├── frontend/
-│   ├── app/                     # Next.js routes (home, library, auth, module pages)
-│   ├── components/              # UI components and layouts
-│   ├── lib/                     # API client for backend calls
-│   ├── types/                   # Shared TS types for frontend
-│   └── package.json             # Frontend package manifest
-├── deploy/nginx/                # Production reverse-proxy configuration
-├── scripts/                     # Production TLS bootstrap and deployment
-├── docker-compose.yml           # Development stack
-├── docker-compose.production.yml # Production stack
-└── README.md
-```
+Все маршруты модулей и словарного поиска требуют Bearer JWT, кроме регистрации,
+входа, OAuth callback, аудиопрокси и корневого health endpoint.
 
-## API (основные маршруты)
+### Авторизация
 
-- `GET /flashcards`, `GET /flashcards/:id`
-- `POST /flashcards`, `PATCH /flashcards/:id`, `DELETE /flashcards/:id`
-- `POST /upload`
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/google`
 - `GET /auth/google/callback`
 
-## Документация
+### Модули
 
-- [frontend/QUICK_START.md](./frontend/QUICK_START.md)
-- [frontend/COMPONENTS.md](./frontend/COMPONENTS.md)
-- [frontend/PROJECT_OVERVIEW.md](./frontend/PROJECT_OVERVIEW.md)
+- `GET /flashcards?skip=0&take=20`
+- `GET /flashcards/:id`
+- `POST /flashcards`
+- `PATCH /flashcards/:id`
+- `DELETE /flashcards/:id`
+
+### Словарь и файлы
+
+- `GET /dictionary/lookup?word=run&source=cambridge`
+- `GET /dictionary/audio/:id`
+- `POST /upload`
+
+Интерактивная документация находится на `/api/docs`, OpenAPI JSON — на
+`/api/docs-json`.
+
+## Авторизация во frontend
+
+Frontend хранит сессию одновременно в двух местах:
+
+- `localStorage.token` и `localStorage.user` используются клиентскими запросами;
+- cookie `token` используется Server Components.
+
+Запись и удаление обоих представлений выполняют функции из `frontend/lib/auth.ts`.
+JWT и cookie имеют срок жизни 60 минут.
+
+## Тесты и сборка
+
+```bash
+# Все unit-тесты: backend → dictionary-service → frontend
+npm test
+
+# Frontend E2E в Chromium, Firefox и WebKit
+npm run test:e2e
+
+# Сборки отдельных сервисов
+npm --prefix frontend run build
+npm --prefix backend run build
+npm --prefix dictionary-service run build
+```
+
+Frontend использует Vitest и Testing Library, backend и dictionary-service —
+Jest, browser E2E — Playwright.
+
+## Структура репозитория
+
+```text
+flashcards2/
+├── frontend/
+│   ├── app/                    # Next.js App Router
+│   ├── components/             # UI и layout-компоненты
+│   ├── lib/                    # API, auth, темы и логика write
+│   ├── e2e/                    # Playwright tests
+│   └── types/
+├── backend/
+│   ├── src/auth/               # JWT и Google OAuth
+│   ├── src/flashcards/         # CRUD модулей и терминов
+│   ├── src/dictionary/         # Кеш и проксирование словаря
+│   ├── src/uploads/            # Загрузка изображений
+│   └── prisma/                 # Схема и миграции
+├── dictionary-service/
+│   └── src/dictionary/         # Cambridge/Oxford providers
+├── deploy/nginx/               # Production reverse proxy
+├── scripts/                    # TLS bootstrap и deployment
+├── docker-compose.yml
+└── docker-compose.production.yml
+```
+
+## Production
+
+Production Compose использует образы GHCR с неизменяемыми `sha-*` тегами,
+закрытую Docker-сеть, Nginx и Let’s Encrypt. Публично доступны только порты 80
+и 443.
+
+```bash
+cp .env.production.example .env.production
+./scripts/init-production-tls.sh .env.production
+```
+
+Последующие обновления:
+
+```bash
+./scripts/deploy-production.sh .env.production
+```
+
+`NEXT_PUBLIC_API_URL` встраивается во frontend во время сборки образа и должен
+совпадать с `https://$API_HOST`. Для CD задайте GitHub Actions repository
+variables `API_HOST` и `NEXT_PUBLIC_API_URL`.
+
+## Дополнительная документация
+
+- [Быстрый старт frontend](./frontend/QUICK_START.md)
+- [Компоненты frontend](./frontend/COMPONENTS.md)
+- [Архитектура frontend](./frontend/PROJECT_OVERVIEW.md)
+- [Backend](./backend/README.md)
