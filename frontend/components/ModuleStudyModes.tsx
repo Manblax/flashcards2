@@ -26,6 +26,10 @@ export default function ModuleStudyModes({ moduleId }: ModuleStudyModesProps) {
         <WriteIcon />
         write
       </Link>
+      <Link href={`/module/${moduleId}/spell`} className={secondaryButtonClass}>
+        <SpellIcon />
+        spell
+      </Link>
     </div>
   );
 }
@@ -111,6 +115,32 @@ function WriteIcon() {
         strokeLinejoin="round"
         strokeWidth="2"
         d="M16.5 3.5a2.121 2.121 0 013 3L8 18l-4 1 1-4L16.5 3.5z"
+      />
+    </svg>
+  );
+}
+
+function SpellIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M11 5 6 9H3v6h3l5 4V5Z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"
       />
     </svg>
   );

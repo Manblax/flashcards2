@@ -6,8 +6,7 @@ import {
   lookupDictionary,
   type DictionaryLookupResult,
 } from "@/lib/api";
-
-type PronunciationVariant = "uk" | "us";
+import type { PronunciationVariant } from "@/lib/pronunciation-settings";
 
 interface PronunciationButtonProps {
   term: string;

@@ -18,16 +18,17 @@ import {
   getDictionarySourcePreference,
   type DictionarySourcePreference,
 } from "@/lib/dictionary-settings";
-
-type PronunciationVariant = "uk" | "us";
+import {
+  getPronunciationVariantPreference,
+  PRONUNCIATION_SETTING_KEY,
+  type PronunciationVariant,
+} from "@/lib/pronunciation-settings";
 
 interface SavedSettings {
   theme: AppTheme;
   pronunciationVariant: PronunciationVariant;
   dictionarySource: DictionarySourcePreference;
 }
-
-const PRONUNCIATION_SETTING_KEY = "preferred-pronunciation-variant";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -72,9 +73,7 @@ export default function SettingsPage() {
   }, [router]);
 
   useEffect(() => {
-    const storedVariant = localStorage.getItem(PRONUNCIATION_SETTING_KEY);
-    const nextPronunciationVariant =
-      storedVariant === "uk" || storedVariant === "us" ? storedVariant : "uk";
+    const nextPronunciationVariant = getPronunciationVariantPreference();
     const nextTheme = getStoredTheme();
     const nextDictionarySource = getDictionarySourcePreference();
 

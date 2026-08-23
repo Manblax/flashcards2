@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import ModuleStudyModes from "./ModuleStudyModes";
 
 describe("ModuleStudyModes", () => {
-  it("places the write link immediately after the test button", () => {
+  it("places the spell link immediately after write", () => {
     const { container } = render(<ModuleStudyModes moduleId="module-1" />);
     const controls = Array.from(container.querySelectorAll("button, a"));
 
@@ -13,10 +13,15 @@ describe("ModuleStudyModes", () => {
       "Заучивание",
       "Тест",
       "write",
+      "spell",
     ]);
     expect(screen.getByRole("link", { name: "write" })).toHaveAttribute(
       "href",
       "/module/module-1/write",
+    );
+    expect(screen.getByRole("link", { name: "spell" })).toHaveAttribute(
+      "href",
+      "/module/module-1/spell",
     );
   });
 });
