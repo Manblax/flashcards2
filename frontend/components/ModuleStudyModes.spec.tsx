@@ -9,12 +9,16 @@ describe("ModuleStudyModes", () => {
     const controls = Array.from(container.querySelectorAll("button, a"));
 
     expect(controls.map((control) => control.textContent?.trim())).toEqual([
-      "Карточки",
+      "card",
       "Заучивание",
       "Тест",
       "write",
       "spell",
     ]);
+    expect(screen.getByRole("link", { name: "card" })).toHaveAttribute(
+      "href",
+      "/module/module-1/card",
+    );
     expect(screen.getByRole("link", { name: "write" })).toHaveAttribute(
       "href",
       "/module/module-1/write",

@@ -10,10 +10,13 @@ const secondaryButtonClass =
 export default function ModuleStudyModes({ moduleId }: ModuleStudyModesProps) {
   return (
     <div className="mb-8 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
-      <button className="btn btn-primary gap-2 px-5 sm:px-6">
+      <Link
+        href={`/module/${moduleId}/card`}
+        className="btn btn-primary gap-2 px-5 sm:px-6"
+      >
         <CardsIcon />
-        Карточки
-      </button>
+        card
+      </Link>
       <button className={secondaryButtonClass}>
         <BookIcon />
         Заучивание
