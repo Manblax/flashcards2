@@ -24,10 +24,10 @@ export default function ModuleStudyModes({ moduleId }: ModuleStudyModesProps) {
         <BookIcon />
         learn
       </Link>
-      <button className={secondaryButtonClass}>
+      <Link href={`/module/${moduleId}/test`} className={secondaryButtonClass}>
         <TestIcon />
-        Тест
-      </button>
+        test
+      </Link>
       <Link href={`/module/${moduleId}/write`} className={secondaryButtonClass}>
         <WriteIcon />
         write

@@ -11,7 +11,7 @@ describe("ModuleStudyModes", () => {
     expect(controls.map((control) => control.textContent?.trim())).toEqual([
       "card",
       "learn",
-      "Тест",
+      "test",
       "write",
       "spell",
     ]);
@@ -22,6 +22,10 @@ describe("ModuleStudyModes", () => {
     expect(screen.getByRole("link", { name: "learn" })).toHaveAttribute(
       "href",
       "/module/module-1/learn",
+    );
+    expect(screen.getByRole("link", { name: "test" })).toHaveAttribute(
+      "href",
+      "/module/module-1/test",
     );
     expect(screen.getByRole("link", { name: "write" })).toHaveAttribute(
       "href",
