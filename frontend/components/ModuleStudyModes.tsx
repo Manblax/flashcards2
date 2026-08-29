@@ -17,10 +17,13 @@ export default function ModuleStudyModes({ moduleId }: ModuleStudyModesProps) {
         <CardsIcon />
         card
       </Link>
-      <button className={secondaryButtonClass}>
+      <Link
+        href={`/module/${moduleId}/learn`}
+        className={secondaryButtonClass}
+      >
         <BookIcon />
-        Заучивание
-      </button>
+        learn
+      </Link>
       <button className={secondaryButtonClass}>
         <TestIcon />
         Тест

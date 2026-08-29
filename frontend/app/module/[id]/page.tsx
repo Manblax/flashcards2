@@ -67,7 +67,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
             <p className="text-neutral-content mb-6">{module.description}</p>
           )}
 
-          {/* Кнопки режимов (Заучивание, Карточки и т.д.) */}
+          {/* Кнопки режимов обучения */}
           <ModuleStudyModes moduleId={module.id} />
         </div>
 
