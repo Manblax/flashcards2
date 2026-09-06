@@ -19,7 +19,7 @@ export default async function LibraryPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="page-container max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
       {/* Табы */}
       <div className="tabs mb-6 sm:mb-8">
         <button

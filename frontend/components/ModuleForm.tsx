@@ -366,7 +366,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
   return (
     <div className="mx-auto max-w-5xl">
       {/* Хедер формы с действиями */}
-      <div className="sticky top-[101px] z-10 mb-6 flex items-center justify-between gap-3 bg-base-100/95 py-3 backdrop-blur sm:mb-8 sm:py-4 md:top-[65px]">
+      <div className="sticky top-[var(--app-header-height)] z-10 mb-6 flex items-center justify-between gap-3 bg-base-100/95 py-3 backdrop-blur sm:mb-8 sm:py-4">
         {mode === "edit" ? (
            <Link href={`/module/${initialData?.id}`} className="btn btn-primary btn-sm min-w-0 rounded-full px-4 font-semibold sm:px-6">
              Назад к модулю
@@ -455,9 +455,9 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
               </div>
 
               {/* Поля ввода */}
-              <div className="grid grid-cols-[minmax(0,1fr)_5rem] gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem]">
+              <div className="grid grid-cols-[minmax(0,1fr)_5rem] gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem]">
                 {/* Термин */}
-                <div className="form-control col-span-2 w-full lg:col-span-1">
+                <div className="form-control col-span-2 w-full xl:col-span-1">
                   <input
                     type="text"
                     className={termInputClassName}
@@ -476,7 +476,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 </div>
 
                 {/* Определение */}
-                <div className="form-control relative w-full">
+                <div className="form-control relative min-w-0 w-full">
                   <div className="relative">
                     <input
                       type="text"
@@ -731,10 +731,10 @@ function ImportModal({
   onImport: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-[var(--app-modal-bg)] text-[var(--app-text-strong)]">
+    <div className="import-dialog fixed inset-0 z-[200] flex flex-col bg-[var(--app-modal-bg)] text-[var(--app-text-strong)]">
       <button
         type="button"
-        className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-panel-strong)] text-[var(--app-text-strong)] transition-colors hover:bg-[var(--app-panel-strong-hover)]"
+        className="absolute right-4 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--app-panel-strong)] text-[var(--app-text-strong)] transition-colors hover:bg-[var(--app-panel-strong-hover)]"
         onClick={onClose}
         aria-label="Закрыть импорт"
       >
@@ -754,7 +754,7 @@ function ImportModal({
         </svg>
       </button>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-44 pt-16 sm:px-8 sm:pb-28 sm:pt-12">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-16 sm:px-8">
         <div className="mb-6 pr-10 text-base text-[var(--app-text-strong)] sm:pr-0">
           <span className="font-semibold">Импортировать данные.</span>{" "}
           <span className="text-neutral-content">
@@ -809,7 +809,7 @@ function ImportModal({
           </h2>
 
           {parsedCards.length ? (
-            <div className="mt-4 max-h-[34vh] max-w-5xl overflow-y-auto pr-2">
+            <div className="mt-4 max-w-5xl">
               <div className="space-y-3">
               {parsedCards.map((card, index) => (
                 <div
@@ -845,7 +845,7 @@ function ImportModal({
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 flex flex-col-reverse justify-end gap-3 border-t border-[var(--app-panel-strong)] bg-[var(--app-modal-bg)] px-4 py-4 sm:flex-row sm:gap-4 sm:px-8">
+      <div className="shrink-0 flex flex-col-reverse justify-end gap-3 border-t border-[var(--app-panel-strong)] bg-[var(--app-modal-bg)] px-4 py-4 sm:flex-row sm:gap-4 sm:px-8">
         <button
           type="button"
           className="btn w-full rounded-full border border-[var(--app-border-strong)] bg-transparent px-7 text-base font-semibold text-[var(--app-text-strong)] hover:bg-[var(--app-panel)] sm:w-auto"
@@ -903,7 +903,7 @@ function ImportSeparatorGroup<T extends string>({
             {option.value === "custom" ? (
               <input
                 type="text"
-                className="input h-12 min-h-12 min-w-0 flex-1 rounded-md border-none bg-[var(--app-panel-strong)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none sm:w-48 sm:flex-none"
+                className="input h-12 min-h-12 min-w-0 flex-1 rounded-md border-none bg-[var(--app-panel-strong)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-neutral-content focus:outline-none sm:w-48 sm:max-w-full"
                 placeholder={option.label}
                 value={customValue}
                 onFocus={() => onChange(option.value)}

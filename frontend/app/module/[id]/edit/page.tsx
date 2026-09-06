@@ -21,14 +21,14 @@ export default async function EditPage({ params }: EditPageProps) {
 
   if (!module) {
     return (
-      <div className="container mx-auto px-4 py-6 text-center text-error sm:px-6 sm:py-8">
+      <div className="page-container px-4 py-6 text-center text-error sm:px-6 sm:py-8">
         Модуль не найден
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-8">
+    <div className="page-container px-4 py-4 sm:px-6 sm:py-8">
       <ModuleForm mode="edit" initialData={module} />
     </div>
   );

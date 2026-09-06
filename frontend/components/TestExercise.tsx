@@ -173,7 +173,7 @@ function TestSetup({
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-10">
+    <div className="page-container px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
         <Link
           href={`/module/${moduleId}`}
@@ -185,7 +185,7 @@ function TestSetup({
 
         <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-lg sm:p-8">
           <div className="mb-8 flex items-start justify-between gap-5">
-            <div>
+            <div className="min-w-0">
               <p className="mb-2 truncate text-sm font-bold text-primary" title={moduleTitle}>
                 {moduleTitle}
               </p>
@@ -197,7 +197,7 @@ function TestSetup({
           </div>
 
           <div className="space-y-6">
-            <div className="grid gap-3 border-b border-[var(--app-divider)] pb-6 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center">
+            <div className="grid grid-cols-1 gap-3 border-b border-[var(--app-divider)] pb-6 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center">
               <label htmlFor="test-question-count" className="font-bold text-[var(--app-text-strong)]">
                 Вопросы <span className="font-normal text-[var(--app-text-muted)]">(максимум {termCount})</span>
               </label>
@@ -220,7 +220,7 @@ function TestSetup({
               />
             </div>
 
-            <div className="grid gap-3 border-b border-[var(--app-divider)] pb-6 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center">
+            <div className="grid grid-cols-1 gap-3 border-b border-[var(--app-divider)] pb-6 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center">
               <label htmlFor="test-answer-with" className="font-bold text-[var(--app-text-strong)]">
                 В качестве ответа
               </label>
@@ -340,7 +340,7 @@ function ActiveTest({
         total={total}
       />
 
-      <main className="container mx-auto px-4 pt-6 sm:px-6 sm:pt-8">
+      <main className="page-container px-4 pt-6 sm:px-6 sm:pt-8">
         <div className="mx-auto max-w-5xl space-y-5">
           {state.questions.map((question, index) => {
             if (question.type === "matching" && question.matchingGroupId) {
@@ -424,8 +424,8 @@ function TestHeader({
   const progress = total === 0 ? 0 : Math.round((answered / total) * 100);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--app-border)] bg-base-100/95 shadow-sm backdrop-blur">
-      <div className="container mx-auto grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
+    <header className="sticky top-[var(--app-header-height)] z-30 border-b border-[var(--app-border)] bg-base-100/95 shadow-sm backdrop-blur">
+      <div className="page-container grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-6">
         <Link
           href={`/module/${moduleId}`}
           className="btn btn-circle btn-ghost text-[var(--app-text-strong)]"
@@ -542,7 +542,7 @@ function TrueFalseQuestion({
 
   return (
     <div>
-      <div className="grid gap-5 sm:grid-cols-2 sm:gap-0">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-0">
         <PromptBlock
           label={answerWith === "term" ? "Определение" : "Термин"}
           text={getTestPrompt(term, answerWith)}
@@ -592,7 +592,7 @@ function ChoiceTestQuestion({
       <p className="mb-3 mt-8 text-sm font-bold text-[var(--app-text-muted)]">
         Выберите ответ
       </p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {question.optionTermIds.map((optionTermId) => {
           const optionTerm = termsById.get(optionTermId);
 
@@ -713,7 +713,7 @@ function MatchingQuestionCard({
             : null;
 
           return term ? (
-            <div key={question.id} className="grid gap-3 rounded-xl bg-base-200 p-3 sm:grid-cols-[minmax(10rem,0.8fr)_2fr] sm:items-center sm:p-4">
+            <div key={question.id} className="grid grid-cols-1 gap-3 rounded-xl bg-base-200 p-3 sm:grid-cols-[minmax(10rem,0.8fr)_minmax(0,2fr)] sm:items-center sm:p-4">
               <button
                 type="button"
                 className={`min-h-12 rounded-lg border-2 px-3 text-left transition-colors ${assignedTerm ? "border-primary bg-primary/10 text-[var(--app-text-strong)]" : selectedTermId ? "border-primary/60 border-dashed text-primary" : "border-[var(--app-border)] border-dashed text-[var(--app-text-muted)]"}`}
@@ -794,9 +794,9 @@ function TestResults({
   const results = getTestQuestionResults(state, terms);
 
   return (
-    <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-8">
-        <aside className="lg:sticky lg:top-5 lg:self-start">
+    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 xl:grid-cols-[14rem_minmax(0,1fr)] xl:gap-8">
+        <aside className="min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
           <Link
             href={`/module/${moduleId}`}
             className="btn btn-ghost mb-4 justify-start gap-2 px-2 text-[var(--app-text-strong)]"
@@ -809,12 +809,12 @@ function TestResults({
             <p className="mt-1 truncate text-sm text-[var(--app-text-muted)]" title={moduleTitle}>
               {moduleTitle}
             </p>
-            <div className="mt-5 grid grid-cols-5 gap-2 lg:grid-cols-4">
+            <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(2.75rem,1fr))] gap-2">
               {results.map((result, index) => (
                 <a
                   key={result.question.id}
                   href={`#result-${result.question.id}`}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${result.isCorrect ? "bg-success/15 text-success" : "bg-error/15 text-error"}`}
+                  className={`flex h-11 w-full items-center justify-center rounded-lg text-sm font-bold ${result.isCorrect ? "bg-success/15 text-success" : "bg-error/15 text-error"}`}
                   aria-label={`Вопрос ${index + 1}: ${result.isCorrect ? "верно" : "неверно"}`}
                 >
                   {result.isCorrect ? "✓" : "×"}
@@ -826,7 +826,7 @@ function TestResults({
 
         <main className="min-w-0">
           <section className="mb-5 rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm sm:p-8">
-            <div className="grid gap-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
               <div
                 className={`radial-progress text-2xl font-bold ${score.percentage >= 70 ? "text-success" : score.percentage >= 50 ? "text-warning" : "text-error"}`}
                 style={{ "--value": score.percentage, "--size": "8rem" } as React.CSSProperties}
@@ -1008,7 +1008,7 @@ function EmptyTestExercise({
   moduleTitle: string;
 }) {
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6">
+    <div className="page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <TestIcon />
         <p className="mt-4 text-sm font-bold uppercase tracking-wide text-primary">

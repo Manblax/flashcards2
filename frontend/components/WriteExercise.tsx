@@ -119,8 +119,8 @@ export default function WriteExercise({
   };
 
   return (
-    <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-8">
+    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto grid max-w-7xl gap-5 xl:grid-cols-[16rem_minmax(0,1fr)] xl:gap-8">
         <WriteSidebar
           moduleId={moduleId}
           moduleTitle={moduleTitle}
@@ -189,7 +189,7 @@ function WriteSidebar({
   const incorrect = state.completed ? 0 : state.incorrectCount;
 
   return (
-    <aside className="min-w-0 lg:sticky lg:top-5 lg:self-start">
+    <aside className="min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
       <Link
         href={`/module/${moduleId}`}
         className="btn btn-ghost mb-4 justify-start gap-2 px-2 text-[var(--app-text-strong)]"
@@ -214,7 +214,7 @@ function WriteSidebar({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 lg:grid-cols-1 lg:gap-5">
+        <div className="grid grid-cols-3 gap-3 xl:grid-cols-1 xl:gap-5">
           <ProgressStat
             colorClass="progress-primary"
             label="Осталось"
@@ -285,7 +285,7 @@ function WritePrompt({
   stageNumber,
 }: WritePromptProps) {
   return (
-    <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm sm:p-8 lg:min-h-[28rem]">
+    <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm sm:p-8 xl:min-h-[28rem]">
       <div className="mb-7 flex flex-wrap items-start justify-between gap-4 border-b border-[var(--app-divider)] pb-7">
         <div>
           <p className="mb-2 text-sm font-bold uppercase tracking-wide text-primary">
@@ -536,7 +536,7 @@ function EmptyWriteExercise({
   moduleTitle,
 }: Pick<WriteExerciseProps, "moduleId" | "moduleTitle">) {
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6">
+    <div className="page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <WriteIcon centered />
         <h1 className="mt-5 text-3xl font-bold text-[var(--app-text-strong)]">

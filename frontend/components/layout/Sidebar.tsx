@@ -22,7 +22,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="flex min-h-full w-[min(20rem,86vw)] flex-col border-r border-neutral/30 bg-base-200 lg:min-h-screen lg:w-64">
+    <aside className="flex min-h-dvh w-[min(20rem,86vw)] flex-col border-r border-neutral/30 bg-base-200 xl:min-h-screen xl:w-64">
       {/* Логотип */}
       <div className="flex items-center gap-3 px-5 py-5 sm:p-6">
         <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">

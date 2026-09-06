@@ -27,7 +27,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8">
+    <div className="page-container px-4 py-6 sm:px-6 sm:py-8">
       <div className="max-w-5xl mx-auto">
         {/* Хедер модуля */}
         <div className="mb-7 sm:mb-8">
@@ -37,11 +37,11 @@ export default async function ModulePage({ params }: ModulePageProps) {
               <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-content">
                 <span className="font-bold text-[var(--app-text-strong)]">{module.termCount} терминов</span>
                 <span>•</span>
-                <div className="flex items-center gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <div className="avatar placeholder w-5 h-5 rounded-full bg-warning text-warning-content flex items-center justify-center text-xs font-bold">
                     {module.author[0].toUpperCase()}
                   </div>
-                  <span className="font-medium hover:underline cursor-pointer">{module.author}</span>
+                  <span className="min-w-0 break-words font-medium hover:underline cursor-pointer">{module.author}</span>
                 </div>
               </div>
             </div>
@@ -64,7 +64,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
           
           {/* Описание (если есть) */}
           {module.description && (
-            <p className="text-neutral-content mb-6">{module.description}</p>
+            <p className="text-neutral-content mb-6 break-words">{module.description}</p>
           )}
 
           {/* Кнопки режимов обучения */}
@@ -91,7 +91,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
                 </div>
 
                 {/* Действия (Правая колонка) */}
-                <div className="order-1 flex items-center gap-1 self-end sm:order-none sm:ml-auto sm:self-auto">
+                <div className="order-1 flex shrink-0 items-center gap-1 self-end sm:order-none sm:ml-auto sm:self-auto">
                    <button className={`btn btn-ghost btn-sm btn-circle ${term.isFavorite ? 'text-warning' : 'text-neutral-content hover:text-warning'}`}>
                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={term.isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />

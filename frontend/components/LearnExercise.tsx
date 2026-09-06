@@ -185,7 +185,7 @@ export default function LearnExercise({
   };
 
   return (
-    <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8">
+    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
       <main className="mx-auto max-w-6xl">
         <LearnHeader
           moduleId={moduleId}
@@ -378,7 +378,7 @@ function ChoiceQuestion({
       <p className="mb-4 text-sm font-bold text-[var(--app-text-muted)]">
         Выберите ответ
       </p>
-      <div className="grid gap-3 sm:grid-cols-2" role="group" aria-label="Варианты ответа">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" role="group" aria-label="Варианты ответа">
         {question.optionTermIds.map((optionId, index) => {
           const option = termsById.get(optionId);
 
@@ -400,7 +400,7 @@ function ChoiceQuestion({
             <button
               key={option.id}
               type="button"
-              className={`min-h-20 rounded-xl border-2 px-4 py-3 text-left transition-colors ${feedbackClass}`}
+              className={`min-w-0 min-h-20 rounded-xl border-2 px-4 py-3 text-left transition-colors ${feedbackClass}`}
               onClick={() => onChoice(option.term)}
               disabled={Boolean(feedback)}
             >
@@ -678,7 +678,7 @@ function EmptyLearnExercise({
   moduleTitle: string;
 }) {
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6">
+    <div className="page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <LearnIcon />
         <p className="mt-4 text-sm font-bold uppercase tracking-wide text-primary">

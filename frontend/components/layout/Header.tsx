@@ -9,14 +9,14 @@ interface HeaderProps {
 
 const Header = ({ isAuthenticated }: HeaderProps) => {
   return (
-    <header className="bg-base-100 border-b border-neutral/30 sticky top-0 z-10">
-      <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 md:flex-nowrap md:gap-4 md:py-4">
+    <header className="app-header bg-base-100 border-b border-neutral/30 sticky top-0 z-30">
+      <div className="page-container flex h-[calc(var(--app-header-height)-1px)] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 md:flex-nowrap md:gap-4">
         {isAuthenticated ? (
           <>
-            <div className="flex shrink-0 items-center gap-2 sm:gap-3 lg:hidden">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3 xl:hidden">
               <label
                 htmlFor="app-sidebar"
-                className="btn btn-ghost btn-sm btn-square"
+                className="btn btn-ghost btn-square h-11 min-h-11 w-11"
                 aria-label="Открыть меню"
               >
                 <svg
@@ -43,11 +43,11 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
               </Link>
             </div>
 
-            <div className="relative order-last w-full basis-full md:order-none md:max-w-md md:flex-1 md:basis-auto">
+            <div className="relative order-last min-w-0 w-full basis-full md:order-none md:max-w-md md:flex-1 md:basis-auto">
               <input
                 type="text"
                 placeholder="Поиск"
-                className="input input-sm w-full bg-base-200 pl-10"
+                className="input h-11 min-h-11 w-full text-base bg-base-200 pl-10"
               />
               <svg
                 className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-content"
@@ -86,7 +86,7 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
           {isAuthenticated && (
             <Link
               href="/create"
-              className="btn btn-primary btn-circle btn-sm"
+              className="btn btn-primary btn-circle h-11 min-h-11 w-11"
               title="Создать модуль"
             >
               <svg

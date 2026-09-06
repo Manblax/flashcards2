@@ -287,10 +287,121 @@
 /* Основные стили */
 html {
   min-width: 320px;
-  overflow-x: hidden;
+  --app-header-height: 125px;
+  scroll-padding-top: calc(var(--app-header-height) + 1rem);
 }
 
 body {
-  @apply min-h-screen bg-base-100 text-base-content;
-  overflow-x: hidden;
+  @apply min-h-dvh bg-base-100 text-base-content;
+  overflow-wrap: anywhere;
+}
+
+@layer components {
+  .page-container {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    min-width: 0;
+  }
+
+  .flashcard-face {
+    height: clamp(18rem, calc(100dvh - 18rem), 38rem);
+  }
+
+  .card-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .card-rating {
+    grid-column: 1;
+  }
+
+  .card-tools {
+    grid-column: 2;
+  }
+
+  .card-keyboard-hint {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .card-touch-hint {
+    display: none;
+  }
+
+  .import-dialog {
+    height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@media (min-width: 40rem) {
+  .card-controls {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .card-rating {
+    grid-column: 2;
+  }
+
+  .card-tools {
+    grid-column: 3;
+  }
+}
+
+@media (min-width: 48rem) {
+  html {
+    --app-header-height: 73px;
+  }
+}
+
+/* Keep the learning controls in charge of the limited tablet/phone canvas. */
+@media (width < 80rem) {
+  .study-shell {
+    --app-header-height: 0px;
+  }
+
+  .study-shell .app-header,
+  .study-shell > .drawer-side {
+    display: none;
+  }
+}
+
+@media (min-width: 80rem) {
+  .flashcard-face {
+    height: clamp(18rem, calc(100dvh - 23rem), 38rem);
+  }
+}
+
+/* Small icon actions must remain usable without a mouse, including on iPad. */
+@media (pointer: coarse) {
+  .card-keyboard-hint {
+    display: none;
+  }
+
+  .card-touch-hint {
+    display: inline;
+  }
+
+  .btn {
+    min-height: 2.75rem;
+  }
+
+  .btn-circle,
+  .btn-square {
+    min-width: 2.75rem;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    font-size: max(1rem, 1em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer-side,
+  .drawer-side > * {
+    transition-duration: 0s;
+  }
 }

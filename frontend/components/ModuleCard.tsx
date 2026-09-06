@@ -7,7 +7,7 @@ interface ModuleCardProps {
 
 const ModuleCard = ({ module }: ModuleCardProps) => {
   return (
-    <Link href={`/module/${module.id}`}>
+    <Link href={`/module/${module.id}`} className="min-w-0">
       <div className="card bg-base-300/50 hover:bg-base-300 transition-all cursor-pointer border border-neutral/10 hover:border-primary/30 rounded-2xl overflow-hidden">
         <div className="card-body flex flex-row items-center gap-3 p-4 sm:gap-4 sm:p-6">
           {/* Иконка модуля */}
@@ -38,7 +38,7 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
                 {module.termCount} {getTermWord(module.termCount)}
               </span>
               <span>•</span>
-              <div className="flex items-center gap-1">
+              <div className="flex min-w-0 items-center gap-1">
                 <div className="avatar placeholder">
                   <div className="bg-warning text-warning-content rounded-full w-5 h-5">
                     <span className="text-xs font-semibold">
@@ -46,7 +46,7 @@ const ModuleCard = ({ module }: ModuleCardProps) => {
                     </span>
                   </div>
                 </div>
-                <span>Автор: {module.author}</span>
+                <span className="min-w-0 break-words">Автор: {module.author}</span>
               </div>
             </div>
           </div>

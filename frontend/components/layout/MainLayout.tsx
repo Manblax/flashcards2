@@ -1,3 +1,6 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
@@ -7,9 +10,12 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, isAuthenticated }: MainLayoutProps) => {
+  const pathname = usePathname();
+  const isStudyPage = /^\/module\/[^/]+\/(card|learn|test|write|spell)\/?$/.test(pathname);
+
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen min-w-0 flex-col">
+      <div className="flex min-h-dvh min-w-0 flex-col [--app-header-height:73px]">
         <Header isAuthenticated={false} />
         <main className="min-w-0 flex-1">{children}</main>
       </div>
@@ -17,7 +23,7 @@ const MainLayout = ({ children, isAuthenticated }: MainLayoutProps) => {
   }
 
   return (
-    <div className="drawer min-h-screen lg:drawer-open">
+    <div className={`drawer min-h-dvh xl:drawer-open ${isStudyPage ? "study-shell" : ""}`}>
       <input
         id="app-sidebar"
         type="checkbox"

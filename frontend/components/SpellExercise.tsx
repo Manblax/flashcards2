@@ -172,8 +172,8 @@ export default function SpellExercise({
   };
 
   return (
-    <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[16rem_minmax(0,1fr)] lg:gap-8">
+    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+      <div className="mx-auto grid max-w-7xl gap-5 xl:grid-cols-[16rem_minmax(0,1fr)] xl:gap-8">
         <SpellSidebar
           moduleId={moduleId}
           moduleTitle={moduleTitle}
@@ -240,7 +240,7 @@ function SpellSidebar({
   const stageCompleted = state.completed ? stageTotal : state.currentIndex;
 
   return (
-    <aside className="min-w-0 lg:sticky lg:top-5 lg:self-start">
+    <aside className="min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
       <Link
         href={`/module/${moduleId}`}
         className="btn btn-ghost mb-4 justify-start gap-2 px-2 text-[var(--app-text-strong)]"
@@ -265,7 +265,7 @@ function SpellSidebar({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-1 lg:gap-6">
+        <div className="grid grid-cols-2 gap-4 xl:grid-cols-1 xl:gap-6">
           <SpellProgressStat
             label="Общий прогресс"
             value={overallProgress}
@@ -351,7 +351,7 @@ function SpellPrompt({
       : "Ответ";
 
   return (
-    <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm sm:p-8 lg:min-h-[25rem]">
+    <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm sm:p-8 xl:min-h-[25rem]">
       <form onSubmit={onSubmit}>
         <div className="flex items-start gap-3">
           <button
@@ -647,7 +647,7 @@ function EmptySpellExercise({
   moduleTitle,
 }: Pick<SpellExerciseProps, "moduleId" | "moduleTitle">) {
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6">
+    <div className="page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <SpellIcon centered />
         <h1 className="mt-5 text-3xl font-bold text-[var(--app-text-strong)]">

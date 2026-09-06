@@ -125,7 +125,7 @@ export default function SettingsPage() {
 
   if (!hasCheckedAuth || !user) {
     return (
-      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-6">
+      <div className="flex min-h-[calc(100dvh-var(--app-header-height))] items-center justify-center px-6">
         <span className="loading loading-spinner loading-lg text-primary" />
       </div>
     );
@@ -206,7 +206,7 @@ function ThemeSettingsRow({
   onChange: (value: AppTheme) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
       <div>
         <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Тема
@@ -216,7 +216,7 @@ function ThemeSettingsRow({
         </div>
       </div>
 
-      <label className="relative block">
+      <label className="relative block min-w-0">
         <select
           className="h-14 w-full appearance-none rounded-xl border border-[var(--app-border-strong)] bg-[var(--app-field-deep)] px-4 pr-12 text-base font-medium text-[var(--app-text-strong)] outline-none transition-colors hover:border-[var(--app-focus)] focus:border-[var(--app-focus)]"
           value={value}
@@ -255,7 +255,7 @@ function PronunciationSettingsRow({
   onChange: (value: PronunciationVariant) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
       <div>
         <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Звук и транскрипция по умолчанию для новых слов
@@ -265,7 +265,7 @@ function PronunciationSettingsRow({
         </div>
       </div>
 
-      <label className="relative block">
+      <label className="relative block min-w-0">
         <select
           className="h-14 w-full appearance-none rounded-xl border border-[var(--app-border-strong)] bg-[var(--app-field-deep)] px-4 pr-12 text-base font-medium text-[var(--app-text-strong)] outline-none transition-colors hover:border-[var(--app-focus)] focus:border-[var(--app-focus)]"
           value={value}
@@ -304,7 +304,7 @@ function DictionarySourceSettingsRow({
   onChange: (value: DictionarySourcePreference) => void;
 }) {
   return (
-    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center">
+    <div className="grid gap-5 border-b border-[var(--app-border)] px-4 py-5 sm:px-7 sm:py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
       <div>
         <div className="mb-2 text-lg font-semibold text-[var(--app-text-strong)]">
           Словарь
@@ -314,7 +314,7 @@ function DictionarySourceSettingsRow({
         </div>
       </div>
 
-      <label className="relative block">
+      <label className="relative block min-w-0">
         <select
           className="h-14 w-full appearance-none rounded-xl border border-[var(--app-border-strong)] bg-[var(--app-field-deep)] px-4 pr-12 text-base font-medium text-[var(--app-text-strong)] outline-none transition-colors hover:border-[var(--app-focus)] focus:border-[var(--app-focus)]"
           value={value}
@@ -356,7 +356,7 @@ function SettingsRow({ label, value }: { label: string; value: string }) {
     <div className="flex min-h-24 flex-col items-start justify-between gap-4 border-b border-[var(--app-border)] px-4 py-5 sm:flex-row sm:items-center sm:gap-8 sm:px-7 sm:py-6">
       <div className="min-w-0">
         <div className="mb-3 text-lg font-semibold text-[var(--app-text-strong)]">{label}</div>
-        <div className="truncate text-lg font-normal text-neutral-content">
+        <div className="break-words text-lg font-normal text-neutral-content">
           {value}
         </div>
       </div>

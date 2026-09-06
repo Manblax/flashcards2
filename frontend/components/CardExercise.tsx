@@ -183,7 +183,7 @@ export default function CardExercise({
   };
 
   return (
-    <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8">
+    <div className="page-container overflow-x-clip px-4 py-5 sm:px-6 sm:py-8">
       <main className="mx-auto max-w-6xl">
         <CardExerciseHeader
           moduleId={moduleId}
@@ -377,7 +377,7 @@ function CardFace({
 
   return (
     <section
-      className={`col-start-1 row-start-1 grid min-h-[29rem] grid-rows-[auto_1fr_auto] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel-strong)] shadow-[0_18px_45px_var(--app-shadow)] [backface-visibility:hidden] sm:min-h-[38rem] ${
+      className={`col-start-1 row-start-1 flashcard-face min-w-0 grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel-strong)] shadow-[0_18px_45px_var(--app-shadow)] [backface-visibility:hidden] ${
         isDefinition ? "[transform:rotateX(180deg)]" : ""
       } ${active ? "" : "pointer-events-none"}`}
       aria-hidden={!active}
@@ -429,7 +429,7 @@ function CardFace({
           </button>
           {active && pronunciation.message && (
             <span
-              className={`max-w-56 text-right text-xs ${
+              className={`max-w-32 sm:max-w-56 text-right text-xs ${
                 pronunciation.status === "error"
                   ? "text-error"
                   : "text-[var(--app-text-muted)]"
@@ -444,42 +444,47 @@ function CardFace({
 
       <button
         type="button"
-        className="flex w-full cursor-pointer flex-col items-center justify-center gap-5 px-5 py-8 text-center outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[var(--app-focus-shadow)] sm:px-10"
+        className="flex min-h-0 w-full cursor-pointer flex-col items-center overflow-y-auto overscroll-contain px-5 py-5 text-center outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-[var(--app-focus-shadow)] sm:px-10"
         onClick={onFlip}
         disabled={!active}
         tabIndex={active ? 0 : -1}
         aria-label={isDefinition ? "Показать термин" : "Показать определение"}
       >
-        <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--app-text-muted)]">
-          {isDefinition ? "Определение" : "Термин"}
+        <span className="my-auto flex w-full shrink-0 flex-col items-center gap-5">
+          <span className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--app-text-muted)]">
+            {isDefinition ? "Определение" : "Термин"}
+          </span>
+          <span
+            className={`w-full max-w-4xl [overflow-wrap:anywhere] text-[var(--app-text-strong)] ${
+              isDefinition
+                ? "text-2xl leading-relaxed sm:text-4xl"
+                : "text-3xl leading-tight sm:text-5xl"
+            }`}
+          >
+            {isDefinition ? term.definition : term.term}
+          </span>
+          {isDefinition && term.image && (
+            <img
+              src={term.image}
+              alt=""
+              className="max-h-40 max-w-full rounded-xl object-contain"
+            />
+          )}
         </span>
-        <span
-          className={`max-w-4xl break-words text-[var(--app-text-strong)] ${
-            isDefinition
-              ? "text-2xl leading-relaxed sm:text-4xl"
-              : "text-3xl leading-tight sm:text-5xl"
-          }`}
-        >
-          {isDefinition ? term.definition : term.term}
-        </span>
-        {isDefinition && term.image && (
-          <img
-            src={term.image}
-            alt=""
-            className="max-h-40 max-w-full rounded-xl object-contain"
-          />
-        )}
       </button>
 
       <button
         type="button"
-        className="flex min-h-11 w-full items-center justify-center gap-2 border-t border-primary/20 bg-primary/15 px-4 py-2 text-sm font-medium text-[var(--app-text-strong)] hover:bg-primary/20"
+        className="flex min-h-11 w-full flex-wrap items-center justify-center gap-2 border-t border-primary/20 bg-primary/15 px-4 py-2 text-sm font-medium text-[var(--app-text-strong)] hover:bg-primary/20"
         onClick={onFlip}
         disabled={!active}
         tabIndex={active ? 0 : -1}
       >
-        <KeyboardIcon />
-        Нажмите <kbd className="kbd kbd-sm">Пробел</kbd> или карточку, чтобы перевернуть её
+        <span className="card-keyboard-hint items-center justify-center gap-2">
+          <KeyboardIcon />
+          Нажмите <kbd className="kbd kbd-sm">Пробел</kbd> или карточку, чтобы перевернуть её
+        </span>
+        <span className="card-touch-hint">Коснитесь карточки, чтобы перевернуть её</span>
       </button>
     </section>
   );
@@ -499,12 +504,12 @@ function CardControls({
   onUndo: () => void;
 }) {
   return (
-    <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:mt-5">
+    <div className="card-controls mt-4 grid items-center gap-3 sm:mt-5">
       <span className="hidden text-sm text-[var(--app-text-muted)] sm:block">
         ← ещё изучаю · знаю →
       </span>
 
-      <div className="col-start-2 flex items-center justify-center gap-5 sm:gap-7">
+      <div className="card-rating flex items-center justify-center gap-5 sm:gap-7">
         <button
           type="button"
           className="btn btn-circle btn-lg border border-error/30 bg-[var(--app-panel-strong)] text-error hover:border-error hover:bg-error/10"
@@ -525,7 +530,7 @@ function CardControls({
         </button>
       </div>
 
-      <div className="flex justify-end gap-1">
+      <div className="card-tools flex justify-end gap-1">
         <button
           type="button"
           className="btn btn-circle btn-ghost text-[var(--app-text-muted)]"
@@ -655,7 +660,7 @@ function EmptyCardExercise({
   moduleTitle: string;
 }) {
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6">
+    <div className="page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-8 text-center shadow-sm">
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/15 text-primary">
           <CardsIcon />
