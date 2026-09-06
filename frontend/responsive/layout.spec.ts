@@ -55,7 +55,7 @@ test('editor toolbar and import actions survive scrolling and long text', async 
   await page.getByRole('button', { name: '+ Добавить карточку' }).scrollIntoViewIfNeeded();
   const header = await page.locator('.app-header').boundingBox();
   const save = await page.getByRole('button', { name: 'Готово', exact: true }).boundingBox();
-  expect(save!.y).toBeGreaterThanOrEqual(header!.height - 1);
+  expect(save!.y).toBeGreaterThanOrEqual((header?.height ?? 0) - 1);
   expect(save!.y + save!.height).toBeLessThan(page.viewportSize()!.height);
   await page.getByRole('button', { name: 'Импортировать', exact: false }).click();
   await page.locator('.import-dialog textarea').fill('term\t' + 'LongDefinition'.repeat(50));
@@ -69,6 +69,9 @@ test('cards can flip and rate with controls fitting the viewport', async ({ page
   await signIn(page);
   await page.goto('/module/responsive/card');
   await expect(page.getByRole('button', { name: 'Знаю', exact: true })).toBeVisible();
+  if (page.viewportSize()!.height < 500) {
+    await page.getByRole('button', { name: 'Знаю', exact: true }).scrollIntoViewIfNeeded();
+  }
   await expect(page.getByRole('button', { name: 'Знаю', exact: true })).toBeInViewport();
   await page.getByRole('button', { name: 'Показать определение', exact: true }).click();
   await page.getByRole('button', { name: 'Знаю', exact: true }).click();

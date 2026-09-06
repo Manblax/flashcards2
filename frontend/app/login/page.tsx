@@ -97,7 +97,7 @@ function LoginPageContent() {
         />
         <button
           type="button"
-          className="absolute right-4 top-[38px] text-neutral-content hover:text-[var(--app-text-strong)]"
+          className="password-toggle absolute right-4 top-[38px] text-neutral-content hover:text-[var(--app-text-strong)]"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
         >
@@ -167,7 +167,7 @@ function LoginPageLayout({
   registerHref?: string;
 }) {
   return (
-    <div className="flex min-h-[calc(100dvh-var(--app-header-height))] items-center justify-center px-4 py-8 sm:py-10">
+    <div className="auth-page flex min-h-[calc(100dvh-var(--app-header-height))] items-center justify-center px-4 py-8 sm:py-10">
       <div className="max-w-md w-full">
         <h1 className="mb-3 text-2xl font-bold text-[var(--app-text-strong)] sm:text-3xl">Вход</h1>
         <p className="mb-8 text-neutral-content">

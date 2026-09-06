@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import MobileTextField from "./MobileTextField";
 import {
   closestCenter,
   DndContext,
@@ -364,15 +365,18 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
     "input h-11 min-h-11 w-full rounded-lg border-2 border-[var(--app-focus)] bg-[var(--app-field-active)] px-4 text-base font-medium text-[var(--app-text-strong)] placeholder:text-[var(--app-field-placeholder)] transition-[border-color,box-shadow,background-color] duration-150 focus:bg-[var(--app-field-active)] focus:border-[var(--app-focus)] focus:shadow-none focus:outline-none";
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="module-editor mx-auto max-w-5xl">
       {/* Хедер формы с действиями */}
-      <div className="sticky top-[var(--app-header-height)] z-10 mb-6 flex items-center justify-between gap-3 bg-base-100/95 py-3 backdrop-blur sm:mb-8 sm:py-4">
+      <div className="editor-toolbar sticky top-[var(--app-header-height)] z-10 mb-6 flex items-center justify-between gap-3 bg-base-100/95 py-3 backdrop-blur sm:mb-8 sm:py-4">
         {mode === "edit" ? (
            <Link href={`/module/${initialData?.id}`} className="btn btn-primary btn-sm min-w-0 rounded-full px-4 font-semibold sm:px-6">
              Назад к модулю
            </Link>
         ) : (
-           <h1 className="min-w-0 text-lg font-bold leading-tight text-[var(--app-text-strong)] sm:text-2xl">Создать новый модуль</h1>
+           <div className="flex min-w-0 items-center gap-2">
+             <Link href="/" aria-label="Назад на главную" className="btn btn-ghost btn-square shrink-0 sm:hidden">←</Link>
+             <h1 className="min-w-0 text-lg font-bold leading-tight text-[var(--app-text-strong)] sm:text-2xl">Создать новый модуль</h1>
+           </div>
         )}
         
         <button 
@@ -394,12 +398,12 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
           <label className="label pl-0 pb-1" hidden={mode === "create"}>
              <span className="label-text text-neutral-content text-xs font-semibold uppercase">Название</span>
           </label>
-          <input
-            type="text"
+          <MobileTextField
+            label="Название"
             placeholder="Название" // Для create
             className={moduleInputClassName}
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={setTitle}
           />
         </div>
         <div className="form-control">
@@ -455,14 +459,14 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
               </div>
 
               {/* Поля ввода */}
-              <div className="grid grid-cols-[minmax(0,1fr)_5rem] gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem]">
+              <div className="editor-fields grid grid-cols-[minmax(0,1fr)_5rem] gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem]">
                 {/* Термин */}
                 <div className="form-control col-span-2 w-full xl:col-span-1">
-                  <input
-                    type="text"
+                  <MobileTextField
+                    label={`Термин ${index + 1}`}
                     className={termInputClassName}
                     value={card.term}
-                    onChange={(e) => updateTerm(card.id, e.target.value)}
+                    onChange={(value) => updateTerm(card.id, value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -470,7 +474,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                       }
                     }}
                   />
-                  <label className="label px-0 pt-1.5">
+                  <label className="field-caption label px-0 pt-1.5">
                     <span className="label-text-alt text-neutral-content uppercase tracking-wider text-xs font-semibold">Термин</span>
                   </label>
                 </div>
@@ -478,8 +482,8 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 {/* Определение */}
                 <div className="form-control relative min-w-0 w-full">
                   <div className="relative">
-                    <input
-                      type="text"
+                    <MobileTextField
+                      label={`Определение ${index + 1}`}
                       className={
                         activeLookupCardId === card.id &&
                         (lookupCardId === card.id ||
@@ -489,7 +493,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                           : termInputClassName
                       }
                       value={card.definition}
-                      onChange={(e) => updateCard(card.id, "definition", e.target.value)}
+                      onChange={(value) => updateCard(card.id, "definition", value)}
                       onFocus={() => openDefinitionDropdown(card)}
                       onKeyDown={(e) => {
                         if (e.key === "Escape") {
@@ -501,7 +505,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                       <span className="loading loading-spinner loading-xs absolute right-4 top-1/2 -translate-y-1/2 text-[var(--app-focus)]"></span>
                     ) : null}
                   </div>
-                  <label className="label px-0 pt-1.5">
+                  <label className="field-caption label px-0 pt-1.5">
                     <span className="label-text-alt text-neutral-content uppercase tracking-wider text-xs font-semibold">
                       Определение
                       {activeLookupCardId === card.id && lookupOptions[card.id]?.length
@@ -552,7 +556,7 @@ export default function ModuleForm({ initialData, mode }: ModuleFormProps) {
                 </div>
 
                 {/* Загрузка изображения */}
-                <div className="flex-none pt-1">
+                <div className="editor-image flex-none pt-1">
                    <button 
                      className="relative flex h-16 w-20 flex-col items-center justify-center gap-0.5 overflow-hidden rounded-lg border-2 border-dashed border-neutral/30 text-neutral-content transition-colors hover:border-neutral/60 hover:text-[var(--app-text-strong)]"
                      onClick={() => handleImageClick(card.id)}

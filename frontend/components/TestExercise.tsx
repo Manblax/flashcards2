@@ -173,7 +173,7 @@ function TestSetup({
   };
 
   return (
-    <div className="page-container px-4 py-6 sm:px-6 sm:py-10">
+    <div className="test-setup mobile-study-page page-container px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
         <Link
           href={`/module/${moduleId}`}
@@ -340,7 +340,7 @@ function ActiveTest({
         total={total}
       />
 
-      <main className="page-container px-4 pt-6 sm:px-6 sm:pt-8">
+      <main className="mobile-study-page page-container px-4 pt-6 sm:px-6 sm:pt-8">
         <div className="mx-auto max-w-5xl space-y-5">
           {state.questions.map((question, index) => {
             if (question.type === "matching" && question.matchingGroupId) {
@@ -794,7 +794,7 @@ function TestResults({
   const results = getTestQuestionResults(state, terms);
 
   return (
-    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+    <div className="mobile-study-page page-container px-4 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 xl:grid-cols-[14rem_minmax(0,1fr)] xl:gap-8">
         <aside className="min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
           <Link
@@ -1008,7 +1008,7 @@ function EmptyTestExercise({
   moduleTitle: string;
 }) {
   return (
-    <div className="page-container px-4 py-8 sm:px-6">
+    <div className="mobile-study-page page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <TestIcon />
         <p className="mt-4 text-sm font-bold uppercase tracking-wide text-primary">

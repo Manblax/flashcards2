@@ -78,7 +78,7 @@ export default async function ModulePage({ params }: ModulePageProps) {
         <div className="space-y-3">
           {module.terms?.map((term) => (
             <div key={term.id} className="card bg-base-200 hover:bg-base-300 transition-colors rounded-xl border border-transparent hover:border-neutral/20">
-              <div className="card-body flex flex-col items-start gap-4 p-4 sm:flex-row sm:items-center sm:gap-8 sm:p-5">
+              <div className="module-term-body card-body flex flex-col items-start gap-4 p-4 sm:flex-row sm:items-center sm:gap-8 sm:p-5">
                 
                 {/* Термин (Левая колонка) */}
                 <div className="order-2 w-full min-w-0 flex-1 border-b border-neutral/20 pb-3 sm:order-none sm:w-auto sm:border-b-0 sm:border-r sm:pb-0 sm:pr-8">

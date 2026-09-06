@@ -119,7 +119,7 @@ export default function WriteExercise({
   };
 
   return (
-    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+    <div className="mobile-study-page page-container px-4 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-7xl gap-5 xl:grid-cols-[16rem_minmax(0,1fr)] xl:gap-8">
         <WriteSidebar
           moduleId={moduleId}
@@ -189,7 +189,7 @@ function WriteSidebar({
   const incorrect = state.completed ? 0 : state.incorrectCount;
 
   return (
-    <aside className="min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
+    <aside className="study-status min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
       <Link
         href={`/module/${moduleId}`}
         className="btn btn-ghost mb-4 justify-start gap-2 px-2 text-[var(--app-text-strong)]"
@@ -286,7 +286,7 @@ function WritePrompt({
 }: WritePromptProps) {
   return (
     <section className="rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-5 shadow-sm sm:p-8 xl:min-h-[28rem]">
-      <div className="mb-7 flex flex-wrap items-start justify-between gap-4 border-b border-[var(--app-divider)] pb-7">
+      <div className="write-prompt-heading mb-7 flex flex-wrap items-start justify-between gap-4 border-b border-[var(--app-divider)] pb-7">
         <div>
           <p className="mb-2 text-sm font-bold uppercase tracking-wide text-primary">
             Этап {stageNumber}
@@ -304,7 +304,7 @@ function WritePrompt({
         </button>
       </div>
 
-      <div className="mb-10">
+      <div className="write-definition mb-10">
         <p className="mb-3 text-sm font-bold uppercase tracking-wide text-[var(--app-text-muted)]">
           Определение
         </p>
@@ -325,7 +325,7 @@ function WritePrompt({
             ref={inputRef}
             id="write-answer"
             type="text"
-            className="input input-lg min-w-0 flex-1 border-x-0 border-t-0 border-b-2 border-[var(--app-field-border,var(--app-border-strong))] bg-[var(--app-field)] px-3 text-[var(--app-text-strong)] outline-none focus:border-primary focus:bg-[var(--app-field-focus)]"
+            className="write-answer input input-lg min-w-0 flex-1 border-x-0 border-t-0 border-b-2 border-[var(--app-field-border,var(--app-border-strong))] bg-[var(--app-field)] px-3 text-[var(--app-text-strong)] outline-none focus:border-primary focus:bg-[var(--app-field-focus)]"
             value={answer}
             onChange={(event) => onAnswerChange(event.target.value)}
             autoComplete="off"
@@ -536,7 +536,7 @@ function EmptyWriteExercise({
   moduleTitle,
 }: Pick<WriteExerciseProps, "moduleId" | "moduleTitle">) {
   return (
-    <div className="page-container px-4 py-8 sm:px-6">
+    <div className="mobile-study-page page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <WriteIcon centered />
         <h1 className="mt-5 text-3xl font-bold text-[var(--app-text-strong)]">

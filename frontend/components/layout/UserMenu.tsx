@@ -46,6 +46,10 @@ export default function UserMenu() {
     };
   }, []);
 
+  const closeMenu = () => {
+    (document.activeElement as HTMLElement | null)?.blur();
+  };
+
   const handleLogout = () => {
     clearAuthSession();
     setUser(null);
@@ -69,16 +73,18 @@ export default function UserMenu() {
   const initials = user.username ? user.username.slice(0, 2).toUpperCase() : "ME";
 
   return (
-    <div className="dropdown dropdown-end relative z-[100] shrink-0">
-      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle p-0">
+    <div className="user-menu dropdown dropdown-end relative z-[100] shrink-0" onKeyDown={(event) => { if (event.key === "Escape") closeMenu(); }}>
+      <button type="button" aria-label="Меню пользователя" onClick={(event) => event.currentTarget.focus()} className="btn btn-ghost btn-circle p-0">
         <div className="w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center">
           <span className="text-sm font-semibold leading-none">{initials}</span>
         </div>
-      </div>
+      </button>
+      <button type="button" tabIndex={-1} aria-label="Закрыть меню пользователя" className="user-menu-overlay" onClick={closeMenu} />
       <div
         tabIndex={0}
-        className="dropdown-content right-0 top-full z-[100] mt-3 max-h-[calc(100dvh-var(--app-header-height)-1rem)] overflow-y-auto overscroll-contain w-[min(280px,calc(100vw-2rem))] rounded-lg border border-[var(--app-border)] bg-[var(--app-dropdown-bg)] p-4 shadow-2xl shadow-[var(--app-shadow)]"
+        className="user-menu-panel dropdown-content right-0 top-full z-[100] mt-3 max-h-[calc(100dvh-var(--app-header-height)-1rem)] overflow-y-auto overscroll-contain w-[min(280px,calc(100vw-2rem))] rounded-lg border border-[var(--app-border)] bg-[var(--app-dropdown-bg)] p-4 shadow-2xl shadow-[var(--app-shadow)]"
       >
+        <button type="button" aria-label="Закрыть меню" className="user-menu-close btn btn-ghost btn-circle" onClick={closeMenu}>×</button>
         {/* Информация о пользователе */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center shrink-0">
@@ -96,6 +102,7 @@ export default function UserMenu() {
         <div className="space-y-1">
           <Link
             href="/settings"
+            onClick={closeMenu}
             className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-[15px] font-medium leading-5 text-neutral-content transition-colors hover:bg-[var(--app-dropdown-hover)] hover:text-[var(--app-text-strong)]"
           >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

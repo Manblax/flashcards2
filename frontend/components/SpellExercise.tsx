@@ -172,7 +172,7 @@ export default function SpellExercise({
   };
 
   return (
-    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+    <div className="mobile-study-page page-container px-4 py-5 sm:px-6 sm:py-8">
       <div className="mx-auto grid max-w-7xl gap-5 xl:grid-cols-[16rem_minmax(0,1fr)] xl:gap-8">
         <SpellSidebar
           moduleId={moduleId}
@@ -240,7 +240,7 @@ function SpellSidebar({
   const stageCompleted = state.completed ? stageTotal : state.currentIndex;
 
   return (
-    <aside className="min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
+    <aside className="study-status min-w-0 xl:sticky xl:top-[calc(var(--app-header-height)+1.25rem)] xl:self-start">
       <Link
         href={`/module/${moduleId}`}
         className="btn btn-ghost mb-4 justify-start gap-2 px-2 text-[var(--app-text-strong)]"
@@ -647,7 +647,7 @@ function EmptySpellExercise({
   moduleTitle,
 }: Pick<SpellExerciseProps, "moduleId" | "moduleTitle">) {
   return (
-    <div className="page-container px-4 py-8 sm:px-6">
+    <div className="mobile-study-page page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <SpellIcon centered />
         <h1 className="mt-5 text-3xl font-bold text-[var(--app-text-strong)]">

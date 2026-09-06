@@ -9,7 +9,7 @@ export default function AuthInput({ label, className = "", ...props }: AuthInput
         <span className="label-text text-neutral-content font-medium text-sm">{label}</span>
       </label>
       <input
-        className={`input w-full bg-base-200/50 border-transparent focus:border-primary/50 focus:bg-base-200 rounded-xl text-[var(--app-text-strong)] placeholder:text-neutral-content/40 transition-all ${className}`}
+        className={`auth-input input w-full bg-base-200/50 border-transparent focus:border-primary/50 focus:bg-base-200 rounded-xl text-[var(--app-text-strong)] placeholder:text-neutral-content/40 transition-all ${className}`}
         {...props}
       />
     </div>

@@ -405,3 +405,302 @@ body {
     transition-duration: 0s;
   }
 }
+
+.user-menu-overlay,
+.user-menu-close {
+  display: none;
+}
+
+/* Phone refinements are kept below the existing tablet breakpoint. */
+@media (width < 40rem) {
+  html {
+    --app-header-height: 117px;
+  }
+
+  .app-header > .page-container {
+    gap: 0.5rem;
+    padding-block: 0.625rem;
+  }
+
+  .editor-shell {
+    --app-header-height: 0px;
+  }
+
+  .editor-shell .app-header,
+  .editor-shell > .drawer-side {
+    display: none;
+  }
+
+  .editor-shell .page-container {
+    padding-top: 0;
+  }
+
+  .editor-toolbar {
+    min-height: 4.25rem;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--app-border);
+  }
+
+  .editor-toolbar h1 {
+    font-size: 1rem;
+  }
+
+  .module-editor > .mb-8 {
+    margin-bottom: 1.5rem;
+  }
+
+  .mobile-text-field {
+    display: block;
+    resize: none;
+    min-height: 2.75rem;
+    max-height: 12rem;
+    overflow-y: auto;
+    padding-block: 0.625rem;
+    line-height: 1.5rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .field-caption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    white-space: normal;
+  }
+
+  .editor-image button {
+    min-height: 4rem;
+  }
+
+  .editor-image button > span {
+    font-size: 0.5625rem;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+
+  .module-list-card .card-body {
+    padding: 0.875rem;
+  }
+
+  .module-list-card .card-body > div:first-child > div {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .module-term-body {
+    gap: 0.75rem;
+  }
+
+  .study-modes > a {
+    min-height: 3.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  .settings-page {
+    padding-block: 1.5rem;
+  }
+
+  .settings-page > h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-page {
+    align-items: flex-start;
+    padding-block: 1.5rem;
+  }
+
+  .auth-input {
+    min-height: 2.75rem;
+  }
+
+  .password-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    top: 1.75rem;
+    right: 0.25rem;
+  }
+
+  .auth-input[type="password"],
+  .auth-input[autocomplete="current-password"],
+  .auth-input[autocomplete="new-password"] {
+    padding-right: 3rem;
+  }
+
+  html:has(.user-menu:focus-within) {
+    overflow: hidden;
+  }
+
+  .user-menu:focus-within > .user-menu-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgb(0 0 0 / 45%);
+  }
+
+  .user-menu-panel {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-height: min(32rem, 85dvh);
+    margin: 0;
+    padding: 3.5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+    border-radius: 1.25rem 1.25rem 0 0;
+    transform-origin: bottom;
+  }
+
+  .user-menu-close {
+    display: flex;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+    font-size: 1.75rem;
+  }
+
+  .mobile-study-page {
+    padding: 0.75rem;
+  }
+
+  .mobile-study-page section {
+    padding: 1rem;
+  }
+
+  .mobile-study-page .flashcard-face {
+    padding: 0;
+    height: clamp(15rem, calc(100dvh - 15rem), 42rem);
+  }
+
+  .card-header,
+  .learn-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .card-header > div:first-child,
+  .learn-header > div:first-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .card-header > div:last-child {
+    margin-top: 0.75rem;
+  }
+
+  .card-controls {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    gap: 0.5rem;
+  }
+
+  .card-rating {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .card-tools {
+    display: contents;
+  }
+
+  .card-tools > button {
+    grid-row: 1;
+  }
+
+  .card-tools > button:first-child {
+    grid-column: 1;
+  }
+
+  .card-tools > button:last-child {
+    grid-column: 3;
+  }
+
+  .study-status > a {
+    margin-bottom: 0.5rem;
+  }
+
+  .study-status > div {
+    padding: 0.75rem;
+  }
+
+  .study-status > div > div:first-child {
+    margin-bottom: 0.625rem;
+    padding-bottom: 0.625rem;
+    gap: 0.5rem;
+  }
+
+  .study-status > div > div:first-child > span {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+  }
+
+  .mobile-study-page p.text-xl {
+    font-size: 1.125rem;
+  }
+
+  .write-prompt-heading {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    gap: 0.5rem;
+  }
+
+  .write-prompt-heading h1 {
+    font-size: 1.25rem;
+  }
+
+  .write-definition {
+    margin-bottom: 1.5rem;
+  }
+
+  .write-answer {
+    flex: none;
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  #spell-answer {
+    min-height: 2.75rem;
+    font-size: 1.25rem;
+  }
+
+  .learn-choice {
+    display: flex;
+    align-items: center;
+    min-height: 3.5rem;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .learn-choice > span:first-child {
+    flex-shrink: 0;
+    margin-right: 0;
+  }
+
+  .learn-choice > span:last-child {
+    min-width: 0;
+  }
+
+  .test-setup section > div:last-child > button {
+    width: 100%;
+  }
+
+  .import-dialog textarea {
+    height: 10rem;
+  }
+}
+
+/* At very narrow widths, give definitions and suggestions the whole card. */
+@media (width < 23rem) {
+  .editor-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-fields > div:first-child {
+    grid-column: auto;
+  }
+
+  .editor-image {
+    justify-self: end;
+    padding-top: 0;
+  }
+}

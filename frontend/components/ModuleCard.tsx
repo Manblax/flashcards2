@@ -8,7 +8,7 @@ interface ModuleCardProps {
 const ModuleCard = ({ module }: ModuleCardProps) => {
   return (
     <Link href={`/module/${module.id}`} className="min-w-0">
-      <div className="card bg-base-300/50 hover:bg-base-300 transition-all cursor-pointer border border-neutral/10 hover:border-primary/30 rounded-2xl overflow-hidden">
+      <div className="module-list-card card bg-base-300/50 hover:bg-base-300 transition-all cursor-pointer border border-neutral/10 hover:border-primary/30 rounded-2xl overflow-hidden">
         <div className="card-body flex flex-row items-center gap-3 p-4 sm:gap-4 sm:p-6">
           {/* Иконка модуля */}
           <div className="flex-shrink-0">

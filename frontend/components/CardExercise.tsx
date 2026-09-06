@@ -183,7 +183,7 @@ export default function CardExercise({
   };
 
   return (
-    <div className="page-container overflow-x-clip px-4 py-5 sm:px-6 sm:py-8">
+    <div className="mobile-study-page page-container overflow-x-clip px-4 py-5 sm:px-6 sm:py-8">
       <main className="mx-auto max-w-6xl">
         <CardExerciseHeader
           moduleId={moduleId}
@@ -253,7 +253,7 @@ function CardExerciseHeader({
   const progress = getCardProgress(state);
 
   return (
-    <header className="mb-5 sm:mb-7">
+    <header className="card-header mb-5 sm:mb-7">
       <div className="mb-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
         <Link
           href={`/module/${moduleId}`}
@@ -660,7 +660,7 @@ function EmptyCardExercise({
   moduleTitle: string;
 }) {
   return (
-    <div className="page-container px-4 py-8 sm:px-6">
+    <div className="mobile-study-page page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-8 text-center shadow-sm">
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary/15 text-primary">
           <CardsIcon />

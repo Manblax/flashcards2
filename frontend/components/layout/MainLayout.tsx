@@ -13,6 +13,8 @@ const MainLayout = ({ children, isAuthenticated }: MainLayoutProps) => {
   const pathname = usePathname();
   const isStudyPage = /^\/module\/[^/]+\/(card|learn|test|write|spell)\/?$/.test(pathname);
 
+  const isEditorPage = pathname === "/create" || /^\/module\/[^/]+\/edit\/?$/.test(pathname);
+
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-dvh min-w-0 flex-col [--app-header-height:73px]">
@@ -23,7 +25,7 @@ const MainLayout = ({ children, isAuthenticated }: MainLayoutProps) => {
   }
 
   return (
-    <div className={`drawer min-h-dvh xl:drawer-open ${isStudyPage ? "study-shell" : ""}`}>
+    <div className={`drawer min-h-dvh xl:drawer-open ${isStudyPage ? "study-shell" : ""} ${isEditorPage ? "editor-shell" : ""}`}>
       <input
         id="app-sidebar"
         type="checkbox"

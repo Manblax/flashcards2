@@ -14,6 +14,8 @@ export default defineConfig({
       env: { INTERNAL_API_URL: 'http://127.0.0.1:3101', NEXT_PUBLIC_API_URL: 'http://127.0.0.1:3101' }, reuseExistingServer: false },
   ],
   projects: [
+    { name: 'iphone-webkit', use: { browserName: 'webkit', viewport: { width: 430, height: 932 }, isMobile: true, hasTouch: true } },
+    { name: 'phone-landscape', use: { browserName: 'chromium', viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true } },
     { name: 'small-phone', use: { browserName: 'chromium', viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true } },
     { name: 'phone', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
     { name: 'tablet-portrait', use: { browserName: 'chromium', viewport: { width: 768, height: 1024 }, hasTouch: true } },

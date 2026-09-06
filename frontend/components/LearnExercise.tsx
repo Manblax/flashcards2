@@ -185,7 +185,7 @@ export default function LearnExercise({
   };
 
   return (
-    <div className="page-container px-4 py-5 sm:px-6 sm:py-8">
+    <div className="mobile-study-page page-container px-4 py-5 sm:px-6 sm:py-8">
       <main className="mx-auto max-w-6xl">
         <LearnHeader
           moduleId={moduleId}
@@ -243,7 +243,7 @@ function LearnHeader({
   const progress = getLearnProgress(state, termCount);
 
   return (
-    <header className="mb-6 sm:mb-8">
+    <header className="learn-header mb-6 sm:mb-8">
       <div className="mb-4 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
         <Link
           href={`/module/${moduleId}`}
@@ -400,7 +400,7 @@ function ChoiceQuestion({
             <button
               key={option.id}
               type="button"
-              className={`min-w-0 min-h-20 rounded-xl border-2 px-4 py-3 text-left transition-colors ${feedbackClass}`}
+              className={`learn-choice min-w-0 min-h-20 rounded-xl border-2 px-4 py-3 text-left transition-colors ${feedbackClass}`}
               onClick={() => onChoice(option.term)}
               disabled={Boolean(feedback)}
             >
@@ -678,7 +678,7 @@ function EmptyLearnExercise({
   moduleTitle: string;
 }) {
   return (
-    <div className="page-container px-4 py-8 sm:px-6">
+    <div className="mobile-study-page page-container px-4 py-8 sm:px-6">
       <section className="mx-auto max-w-2xl rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] p-6 text-center shadow-sm sm:p-10">
         <LearnIcon />
         <p className="mt-4 text-sm font-bold uppercase tracking-wide text-primary">

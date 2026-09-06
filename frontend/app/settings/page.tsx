@@ -132,7 +132,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="settings-page mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
       <h1 className="mb-8 text-3xl font-semibold tracking-normal text-[var(--app-text-strong)] sm:mb-12 sm:text-5xl">
         Настройки
       </h1>
