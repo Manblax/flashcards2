@@ -34,6 +34,25 @@ const oxford: ProviderLookupResult = {
 describe('DictionaryNormalizer', () => {
   const normalizer = new DictionaryNormalizer();
 
+  it.each([cambridge, oxford])(
+    'preserves $source definitions when that dictionary has no audio',
+    (provider) => {
+      const withoutAudio = { ...provider, audio: {} };
+      const result = normalizer.normalize(
+        'run',
+        provider.source === 'cambridge' ? withoutAudio : undefined,
+        provider.source === 'oxford' ? withoutAudio : undefined,
+      );
+
+      expect(result.definitions).toEqual(provider.definitions);
+      expect(result.suggestedDefinition).toBe(provider.definitions[0].text);
+      expect(result.sources.definitions).toBe(provider.source);
+      expect(result.audio.uk).toBeUndefined();
+      expect(result.audio.us).toBeUndefined();
+      expect(result.sources.audio).toBeUndefined();
+    },
+  );
+
   it('prefers Cambridge definitions and fills missing audio from Oxford', () => {
     const result = normalizer.normalize('run', cambridge, oxford);
 

@@ -1,5 +1,9 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
-import { lookupDictionary, synthesizeSpeech } from "./api";
+import {
+  lookupDictionary,
+  synthesizeSpeech,
+  type DictionaryLookupResult,
+} from "./api";
 import { PronunciationSession } from "./pronunciation";
 import { DICTIONARY_SOURCE_SETTING_KEY } from "./dictionary-settings";
 
@@ -8,6 +12,22 @@ vi.mock("./api", () => ({
   synthesizeSpeech: vi.fn(),
   getPublicApiUrl: (url: string) => url,
 }));
+
+function definitionWithoutAudio(
+  source: "cambridge" | "oxford",
+): DictionaryLookupResult {
+  const text = "a round fruit with a red or green skin";
+  return {
+    word: "apple",
+    normalizedWord: "apple",
+    suggestedDefinition: text,
+    definitions: [{ text, examples: [], source }],
+    ipa: {},
+    audio: {},
+    sources: { definitions: source },
+    cached: true,
+  };
+}
 
 describe("PronunciationSession", () => {
   let session: PronunciationSession;
@@ -42,6 +62,63 @@ describe("PronunciationSession", () => {
     session = new PronunciationSession();
   });
   afterEach(() => session.dispose());
+
+  describe.each(["cambridge", "oxford"] as const)(
+    "%s definitions without audio",
+    (source) => {
+      it.each(["uk", "us"] as const)(
+        "uses Google for the term in the %s accent and preserves definitions",
+        async (variant) => {
+          const result = definitionWithoutAudio(source);
+          const original = structuredClone(result);
+          localStorage.setItem(DICTIONARY_SOURCE_SETTING_KEY, source);
+          vi.mocked(lookupDictionary).mockResolvedValue(result);
+
+          expect(await session.play("apple", variant, "dictionary")).toBe(
+            variant,
+          );
+
+          expect(lookupDictionary).toHaveBeenCalledWith("apple");
+          expect(synthesizeSpeech).toHaveBeenCalledExactlyOnceWith(
+            "apple",
+            variant,
+          );
+          expect(created).toEqual(["blob:tts"]);
+          expect(result).toEqual(original);
+        },
+      );
+
+      it("preserves definitions when Google fails", async () => {
+        const result = definitionWithoutAudio(source);
+        const original = structuredClone(result);
+        vi.mocked(lookupDictionary).mockResolvedValue(result);
+        vi.mocked(synthesizeSpeech).mockRejectedValue(
+          new Error("Google unavailable"),
+        );
+
+        await expect(session.play("apple", "uk", "dictionary")).rejects.toThrow(
+          "Google unavailable",
+        );
+
+        expect(synthesizeSpeech).toHaveBeenCalledWith("apple", "uk");
+        expect(created).toEqual([]);
+        expect(result).toEqual(original);
+      });
+
+      it("still prefers an available alternate dictionary recording", async () => {
+        const result = definitionWithoutAudio(source);
+        result.audio.uk = "/uk";
+        result.sources.audio = source;
+        vi.mocked(lookupDictionary).mockResolvedValue(result);
+
+        expect(await session.play("apple", "us", "dictionary")).toBe("uk");
+
+        expect(created).toEqual(["/uk"]);
+        expect(synthesizeSpeech).not.toHaveBeenCalled();
+        expect(result.definitions[0].source).toBe(source);
+      });
+    },
+  );
 
   it("plays preferred recording and reuses lookup on replay", async () => {
     await session.play(" apple ", "us", "dictionary");

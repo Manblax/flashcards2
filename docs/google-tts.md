@@ -8,6 +8,20 @@ English is the only supported language in this version; UK remains the default.
 Both accents use Chirp 3 HD Achernar with its default pace and pitch; the
 request specifies only MP3 encoding in `audioConfig`.
 
+## Dictionary definitions with Google audio
+
+Definitions and pronunciation are handled independently. For example, if the
+selected dictionary returns a definition for a term but neither UK nor US audio,
+its definition remains available to select and save in the card editor. Cards
+and Spell then use Google Achernar to pronounce the term in the preferred accent.
+This works with either Cambridge or Oxford as the selected dictionary.
+
+When dictionary audio is available, the existing recording priority still applies.
+Google supplies audio only: it does not generate, replace, or automatically fill
+definitions. A Google request failure also leaves dictionary definitions and
+saved card text intact. Explicit UK/US buttons fall back to Google when their
+requested accent is missing, even if the dictionary has the other accent.
+
 ## Google Cloud setup
 
 1. Select or create a Google Cloud project, enable billing, and enable the
