@@ -198,7 +198,7 @@ export async function lookupDictionary(
   );
 
   if (!res.ok) {
-    throw new Error("Failed to lookup dictionary word");
+    throw new AudioRequestError(res.status, "Failed to lookup dictionary word");
   }
 
   return res.json();
@@ -248,4 +248,20 @@ export async function login(data: any) {
   }
   
   return res.json();
+}
+
+export class AudioRequestError extends Error {
+  constructor(public readonly status: number, message: string) {
+    super(message);
+  }
+}
+
+export async function synthesizeSpeech(text: string, variant: "uk" | "us"): Promise<Blob> {
+  const res = await apiFetch("/tts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, variant }),
+  });
+  if (!res.ok) throw new AudioRequestError(res.status, "Speech unavailable");
+  return res.blob();
 }

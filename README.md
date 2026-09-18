@@ -274,3 +274,9 @@ variables `API_HOST` и `NEXT_PUBLIC_API_URL`.
 - [Компоненты frontend](./frontend/COMPONENTS.md)
 - [Архитектура frontend](./frontend/PROJECT_OVERVIEW.md)
 - [Backend](./backend/README.md)
+
+### Google Text-to-Speech
+
+Google TTS supplies missing pronunciation recordings and reads Learn/Test text.
+See [Google TTS setup and deployment](docs/google-tts.md) for credentials,
+Docker configuration, caching, and verification.

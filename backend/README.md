@@ -172,3 +172,9 @@ npm --prefix backend run test:cov
 - Общий запуск и production: [корневой README](../README.md)
 - Frontend: [frontend/PROJECT_OVERVIEW.md](../frontend/PROJECT_OVERVIEW.md)
 - Внутренний dictionary-service: `../dictionary-service/`
+
+## Google Text-to-Speech
+
+`POST /tts` accepts `{ "text": "hello", "variant": "uk" }` (or `"us"`),
+requires a bearer JWT, and returns MP3 bytes. Google credentials stay in the
+backend. See [setup, deployment, limits, and cache details](../docs/google-tts.md).

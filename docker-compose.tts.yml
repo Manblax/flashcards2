@@ -1,0 +1,11 @@
+# Optional overlay for development or production Compose.
+services:
+  backend:
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/tts_credentials
+    secrets:
+      - tts_credentials
+
+secrets:
+  tts_credentials:
+    file: ${TTS_CREDENTIALS_FILE:?Set TTS_CREDENTIALS_FILE to the Google ADC JSON file outside the repository}

@@ -1,5 +1,7 @@
 "use client";
 
+import { usePronunciation } from "@/hooks/usePronunciation";
+
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -720,26 +722,29 @@ function InvalidLearnSession({ onRestart }: { onRestart: () => void }) {
 }
 
 function SpeakButton({ text }: { text: string }) {
-  const speak = () => {
-    if (!("speechSynthesis" in window)) {
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    window.speechSynthesis.speak(utterance);
-  };
+  const speech = usePronunciation(text, { mode: "speech" });
 
   return (
-    <button
-      type="button"
-      className="btn btn-circle btn-ghost btn-sm text-[var(--app-text-muted)]"
-      onClick={speak}
-      aria-label="Прослушать определение"
-    >
-      <SpeakerIcon />
-    </button>
+    <span className="inline-flex items-center gap-2">
+      <button
+        type="button"
+        className="btn btn-circle btn-ghost btn-sm text-[var(--app-text-muted)]"
+        onClick={speech.play}
+        disabled={speech.status === "loading"}
+        aria-label="Прослушать определение"
+      >
+        {speech.status === "loading" ? (
+          <span className="loading loading-spinner loading-xs" />
+        ) : (
+          <SpeakerIcon />
+        )}
+      </button>
+      {speech.message && (
+        <span role="status" className="text-xs text-error">
+          {speech.message}
+        </span>
+      )}
+    </span>
   );
 }
 

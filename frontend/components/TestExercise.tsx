@@ -1,5 +1,7 @@
 "use client";
 
+import { usePronunciation } from "@/hooks/usePronunciation";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -1042,26 +1044,29 @@ function clampQuestionCount(value: number, termCount: number) {
 }
 
 function SpeakButton({ text }: { text: string }) {
-  const speak = () => {
-    if (!("speechSynthesis" in window)) {
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    window.speechSynthesis.speak(utterance);
-  };
+  const speech = usePronunciation(text, { mode: "speech" });
 
   return (
-    <button
-      type="button"
-      className="btn btn-circle btn-ghost btn-xs text-[var(--app-text-muted)]"
-      onClick={speak}
-      aria-label="Прослушать вопрос"
-    >
-      <SpeakerIcon />
-    </button>
+    <span className="inline-flex items-center gap-2">
+      <button
+        type="button"
+        className="btn btn-circle btn-ghost btn-xs text-[var(--app-text-muted)]"
+        onClick={speech.play}
+        disabled={speech.status === "loading"}
+        aria-label="Прослушать вопрос"
+      >
+        {speech.status === "loading" ? (
+          <span className="loading loading-spinner loading-xs" />
+        ) : (
+          <SpeakerIcon />
+        )}
+      </button>
+      {speech.message && (
+        <span role="status" className="text-xs text-error">
+          {speech.message}
+        </span>
+      )}
+    </span>
   );
 }
 

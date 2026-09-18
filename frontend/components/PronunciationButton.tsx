@@ -1,122 +1,71 @@
 "use client";
 
-import { useRef, useState } from "react";
-import {
-  getPublicApiUrl,
-  lookupDictionary,
-  type DictionaryLookupResult,
-} from "@/lib/api";
+import { usePronunciation } from "@/hooks/usePronunciation";
 import type { PronunciationVariant } from "@/lib/pronunciation-settings";
 
 interface PronunciationButtonProps {
   term: string;
   className?: string;
 }
-
 export default function PronunciationButton({
   term,
   className = "btn btn-ghost btn-sm gap-1 px-2 text-neutral-content hover:text-[var(--app-text-strong)]",
 }: PronunciationButtonProps) {
-  const [loading, setLoading] = useState<Record<PronunciationVariant, boolean>>({
-    uk: false,
-    us: false,
-  });
-  const [errors, setErrors] = useState<Record<PronunciationVariant, boolean>>({
-    uk: false,
-    us: false,
-  });
-  const lookupRef = useRef<Promise<DictionaryLookupResult> | null>(null);
-  const audioUrlsRef = useRef<Partial<Record<PronunciationVariant, string>>>({});
-  const playbackLocksRef = useRef<Record<PronunciationVariant, boolean>>({
-    uk: false,
-    us: false,
-  });
-
-  const playPronunciation = async (variant: PronunciationVariant) => {
-    const normalizedTerm = term.trim();
-
-    if (!normalizedTerm || playbackLocksRef.current[variant]) {
-      return;
-    }
-
-    playbackLocksRef.current[variant] = true;
-    setLoading((current) => ({ ...current, [variant]: true }));
-    setErrors((current) => ({ ...current, [variant]: false }));
-
-    try {
-      let audioUrl = audioUrlsRef.current[variant];
-
-      if (!audioUrl) {
-        lookupRef.current ??= lookupDictionary(normalizedTerm).catch((error) => {
-          lookupRef.current = null;
-          throw error;
-        });
-        const result = await lookupRef.current;
-        const variantAudioUrl = result.audio[variant];
-
-        if (!variantAudioUrl) {
-          throw new Error(`${variant.toUpperCase()} pronunciation audio not found`);
-        }
-
-        audioUrl = getPublicApiUrl(variantAudioUrl);
-        audioUrlsRef.current[variant] = audioUrl;
-      }
-
-      const audio = new Audio(audioUrl);
-      const releasePlaybackLock = () => {
-        playbackLocksRef.current[variant] = false;
-      };
-
-      audio.addEventListener("ended", releasePlaybackLock, { once: true });
-      audio.addEventListener("error", releasePlaybackLock, { once: true });
-      await audio.play();
-    } catch (error) {
-      console.error("Failed to play pronunciation", error);
-      setErrors((current) => ({ ...current, [variant]: true }));
-      delete audioUrlsRef.current[variant];
-      playbackLocksRef.current[variant] = false;
-    } finally {
-      setLoading((current) => ({ ...current, [variant]: false }));
-    }
-  };
-
   return (
-    <div className="flex items-center" role="group" aria-label={`Произношение: ${term}`}>
-      {(["uk", "us"] as const).map((variant) => {
-        const label = variant.toUpperCase();
-        const hasError = errors[variant];
-
-        return (
-          <button
-            key={variant}
-            type="button"
-            className={
-              hasError
-                ? "btn btn-ghost btn-sm gap-1 px-2 text-error hover:text-error"
-                : className
-            }
-            onClick={() => playPronunciation(variant)}
-            disabled={loading[variant]}
-            title={
-              hasError
-                ? `${label} произношение не найдено`
-                : `Воспроизвести ${label} произношение`
-            }
-            aria-label={`Воспроизвести ${label} произношение: ${term}`}
-          >
-            <span className="font-semibold">{label}</span>
-            {loading[variant] ? (
-              <span
-                className="loading loading-spinner loading-xs"
-                aria-hidden="true"
-              />
-            ) : (
-              <SpeakerIcon />
-            )}
-          </button>
-        );
-      })}
+    <div
+      className="flex items-center"
+      role="group"
+      aria-label={`Произношение: ${term}`}
+    >
+      {(["uk", "us"] as const).map((variant) => (
+        <AccentButton
+          key={variant}
+          term={term}
+          variant={variant}
+          className={className}
+        />
+      ))}
     </div>
+  );
+}
+
+function AccentButton({
+  term,
+  variant,
+  className,
+}: PronunciationButtonProps & { variant: PronunciationVariant }) {
+  const speech = usePronunciation(term, { mode: "exact", variant });
+  const label = variant.toUpperCase();
+  return (
+    <span>
+      <button
+        type="button"
+        className={
+          speech.status === "error"
+            ? "btn btn-ghost btn-sm gap-1 px-2 text-error"
+            : className
+        }
+        onClick={speech.play}
+        disabled={speech.status === "loading"}
+        title={speech.message ?? `Воспроизвести ${label} произношение`}
+        aria-label={`Воспроизвести ${label} произношение: ${term}`}
+      >
+        <span className="font-semibold">{label}</span>
+        {speech.status === "loading" ? (
+          <span
+            className="loading loading-spinner loading-xs"
+            aria-hidden="true"
+          />
+        ) : (
+          <SpeakerIcon />
+        )}
+      </button>
+      {speech.message && (
+        <span role="status" className="sr-only">
+          {speech.message}
+        </span>
+      )}
+    </span>
   );
 }
 

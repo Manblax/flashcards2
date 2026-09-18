@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -10,11 +9,7 @@ import {
 } from "react";
 import type { FormEvent, RefObject } from "react";
 
-import {
-  getPublicApiUrl,
-  lookupDictionary,
-  type DictionaryLookupResult,
-} from "@/lib/api";
+import { usePronunciation } from "@/hooks/usePronunciation";
 import {
   beginSpellCorrection,
   clearSpellSession,
@@ -30,11 +25,7 @@ import {
   submitSpellCorrection,
   type SpellExerciseState,
 } from "@/lib/spell-exercise";
-import {
-  getAlternatePronunciationVariant,
-  getPronunciationVariantPreference,
-  type PronunciationVariant,
-} from "@/lib/pronunciation-settings";
+
 import type { Term } from "@/types/module";
 
 const CORRECT_FEEDBACK_DELAY_MS = 700;
@@ -693,140 +684,16 @@ interface SpellPronunciationController {
   replay: () => void;
 }
 
-interface ResolvedPronunciation {
-  url: string;
-  variant: PronunciationVariant;
-}
-
 function useSpellPronunciation(
   term: Term | null,
   shouldAutoPlay: boolean,
   promptKey: string,
 ): SpellPronunciationController {
-  const [status, setStatus] = useState<PronunciationStatus>("idle");
-  const [message, setMessage] = useState<string | null>(null);
-  const cacheRef = useRef(
-    new Map<string, Promise<ResolvedPronunciation>>(),
-  );
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const requestIdRef = useRef(0);
-
-  const stopCurrentAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-  }, []);
-
-  const resolvePronunciation = useCallback((word: string, retry: boolean) => {
-    if (retry) {
-      cacheRef.current.delete(word);
-    }
-
-    let lookup = cacheRef.current.get(word);
-
-    if (!lookup) {
-      lookup = lookupDictionary(word).then((result) =>
-        selectPronunciation(result),
-      );
-      lookup.catch(() => cacheRef.current.delete(word));
-      cacheRef.current.set(word, lookup);
-    }
-
-    return lookup;
-  }, []);
-
-  const play = useCallback(
-    async (word: string, retry = false) => {
-      const requestId = requestIdRef.current + 1;
-      requestIdRef.current = requestId;
-      stopCurrentAudio();
-      setStatus("loading");
-      setMessage(null);
-
-      try {
-        const pronunciation = await resolvePronunciation(word, retry);
-
-        if (requestIdRef.current !== requestId) {
-          return;
-        }
-
-        const audio = new Audio(pronunciation.url);
-        audioRef.current = audio;
-        await audio.play();
-
-        if (requestIdRef.current === requestId) {
-          setStatus("ready");
-          setMessage(
-            pronunciation.variant === getPronunciationVariantPreference()
-              ? null
-              : `Используется ${pronunciation.variant.toUpperCase()} произношение`,
-          );
-        }
-      } catch (error) {
-        if (requestIdRef.current !== requestId) {
-          return;
-        }
-
-        setStatus("error");
-        setMessage(
-          error instanceof PronunciationUnavailableError
-            ? "Произношение не найдено. Можно продолжить по определению."
-            : "Не удалось воспроизвести звук. Нажмите на динамик, чтобы повторить.",
-        );
-      }
-    },
-    [resolvePronunciation, stopCurrentAudio],
-  );
-
-  useEffect(() => {
-    requestIdRef.current += 1;
-    stopCurrentAudio();
-    setStatus("idle");
-    setMessage(null);
-
-    if (term && shouldAutoPlay) {
-      void play(term.term);
-    }
-
-    return () => {
-      requestIdRef.current += 1;
-      stopCurrentAudio();
-    };
-  }, [play, promptKey, shouldAutoPlay, stopCurrentAudio, term]);
-
-  const replay = useCallback(() => {
-    if (term) {
-      void play(term.term, status === "error");
-    }
-  }, [play, status, term]);
-
-  return { status, message, replay };
+  return usePronunciation(term?.term ?? "", {
+    autoPlay: shouldAutoPlay,
+    promptKey,
+  });
 }
-
-function selectPronunciation(
-  result: DictionaryLookupResult,
-): ResolvedPronunciation {
-  const preferred = getPronunciationVariantPreference();
-  const alternate = getAlternatePronunciationVariant(preferred);
-  const variant = result.audio[preferred]
-    ? preferred
-    : result.audio[alternate]
-      ? alternate
-      : null;
-
-  if (!variant) {
-    throw new PronunciationUnavailableError();
-  }
-
-  return {
-    variant,
-    url: getPublicApiUrl(result.audio[variant]),
-  };
-}
-
-class PronunciationUnavailableError extends Error {}
 
 function SpellIcon({ centered = false }: { centered?: boolean }) {
   return (

@@ -30,6 +30,8 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-http://localhost:3001/auth/google/callback}
       DICTIONARY_SERVICE_URL: ${DICTIONARY_SERVICE_URL:-http://dictionary-service:4000}
+      TTS_VOICE_UK: ${TTS_VOICE_UK:-en-GB-Chirp3-HD-Achernar}
+      TTS_VOICE_US: ${TTS_VOICE_US:-en-US-Chirp3-HD-Achernar}
       DICTIONARY_CACHE_TTL_DAYS: 30
     command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run start:dev"
     ports:

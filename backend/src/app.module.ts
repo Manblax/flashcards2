@@ -1,3 +1,4 @@
+import { TtsModule } from './tts/tts.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,6 +17,7 @@ import { join } from 'path';
     UploadsModule,
     AuthModule,
     DictionaryModule,
+    TtsModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',

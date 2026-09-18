@@ -21,16 +21,8 @@ import {
   type CardRating,
   type CardExerciseState,
 } from "@/lib/card-exercise";
-import {
-  getPublicApiUrl,
-  lookupDictionary,
-  type DictionaryLookupResult,
-} from "@/lib/api";
-import {
-  getAlternatePronunciationVariant,
-  getPronunciationVariantPreference,
-  type PronunciationVariant,
-} from "@/lib/pronunciation-settings";
+import { usePronunciation } from "@/hooks/usePronunciation";
+
 import type { Term } from "@/types/module";
 
 interface CardExerciseProps {
@@ -708,111 +700,8 @@ interface CardPronunciationController {
   play: () => void;
 }
 
-interface ResolvedPronunciation {
-  url: string;
-  variant: PronunciationVariant;
-}
-
 function useCardPronunciation(term: Term | null): CardPronunciationController {
-  const [status, setStatus] = useState<PronunciationStatus>("idle");
-  const [message, setMessage] = useState<string | null>(null);
-  const cacheRef = useRef(
-    new Map<string, Promise<ResolvedPronunciation>>(),
-  );
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const requestIdRef = useRef(0);
-
-  const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    requestIdRef.current += 1;
-    stopAudio();
-    setStatus("idle");
-    setMessage(null);
-
-    return () => {
-      requestIdRef.current += 1;
-      stopAudio();
-    };
-  }, [stopAudio, term]);
-
-  const play = useCallback(async () => {
-    if (!term) {
-      return;
-    }
-
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
-    stopAudio();
-    setStatus("loading");
-    setMessage(null);
-
-    try {
-      const word = term.term.trim();
-      let lookup = cacheRef.current.get(word);
-
-      if (!lookup) {
-        lookup = lookupDictionary(word).then(selectPronunciation);
-        lookup.catch(() => cacheRef.current.delete(word));
-        cacheRef.current.set(word, lookup);
-      }
-
-      const pronunciation = await lookup;
-
-      if (requestIdRef.current !== requestId) {
-        return;
-      }
-
-      const audio = new Audio(pronunciation.url);
-      audioRef.current = audio;
-      await audio.play();
-
-      if (requestIdRef.current === requestId) {
-        setStatus("ready");
-        setMessage(
-          pronunciation.variant === getPronunciationVariantPreference()
-            ? null
-            : `Используется ${pronunciation.variant.toUpperCase()} произношение`,
-        );
-      }
-    } catch {
-      if (requestIdRef.current !== requestId) {
-        return;
-      }
-
-      setStatus("error");
-      setMessage("Произношение недоступно");
-    }
-  }, [stopAudio, term]);
-
-  return { status, message, play: () => void play() };
-}
-
-function selectPronunciation(
-  result: DictionaryLookupResult,
-): ResolvedPronunciation {
-  const preferred = getPronunciationVariantPreference();
-  const alternate = getAlternatePronunciationVariant(preferred);
-  const variant = result.audio[preferred]
-    ? preferred
-    : result.audio[alternate]
-      ? alternate
-      : null;
-
-  if (!variant) {
-    throw new Error("Pronunciation unavailable");
-  }
-
-  return {
-    variant,
-    url: getPublicApiUrl(result.audio[variant]),
-  };
+  return usePronunciation(term?.term ?? "", { promptKey: term?.id });
 }
 
 export function getCardHint(term: Term) {

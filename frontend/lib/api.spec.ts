@@ -11,6 +11,7 @@ import {
   login,
   lookupDictionary,
   register,
+  synthesizeSpeech,
   updateModule,
   uploadFile,
 } from "./api";
@@ -73,7 +74,9 @@ describe("api utilities", () => {
       vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
     );
 
-    await expect(getModule("missing", { token: "token-1" })).resolves.toBeNull();
+    await expect(
+      getModule("missing", { token: "token-1" }),
+    ).resolves.toBeNull();
   });
 
   it("creates, updates, and deletes modules with explicit auth tokens", async () => {
@@ -227,4 +230,33 @@ describe("api utilities", () => {
       "Invalid credentials",
     );
   });
+  it("fetches TTS as a blob with bearer authentication", async () => {
+    localStorage.setItem("token", "stored-token");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("mp3", { headers: { "Content-Type": "audio/mpeg" } }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    const blob = await synthesizeSpeech("hello", "us");
+    expect(blob.type).toBe("audio/mpeg");
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("http://localhost:3001/tts");
+    expect(init.method).toBe("POST");
+    expect(init.headers.get("Authorization")).toBe("Bearer stored-token");
+    expect(JSON.parse(init.body)).toEqual({ text: "hello", variant: "us" });
+  });
+
+  it.each([401, 403, 429, 502])(
+    "preserves TTS HTTP failure status %s",
+    async (status) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(new Response(null, { status })),
+      );
+      await expect(synthesizeSpeech("hello", "uk")).rejects.toMatchObject({
+        status,
+      });
+    },
+  );
 });

@@ -19,6 +19,7 @@ import SpellExercise from "./SpellExercise";
 vi.mock("@/lib/api", () => ({
   getPublicApiUrl: vi.fn((path: string) => `https://api.example.test${path}`),
   lookupDictionary: vi.fn(),
+  synthesizeSpeech: vi.fn().mockRejectedValue(new Error("Speech unavailable")),
 }));
 
 const terms: Term[] = [
